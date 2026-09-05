@@ -7,40 +7,20 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        .login-container {
-            max-width: 400px;
-            margin: 80px auto;
-        }
-        .login-card {
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
+        .login-container { max-width: 400px; margin: 80px auto; }
+        .login-card { border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .password-toggle {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #6c757d;
-            background: transparent;
-            border: none;
-            z-index: 10;
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            cursor: pointer; color: #6c757d; background: transparent; border: none; z-index: 10;
         }
-        .password-toggle:hover {
-            color: #0d6efd;
-        }
-        .password-wrapper {
-            position: relative;
-        }
-        .password-wrapper input {
-            padding-right: 45px;
-        }
+        .password-toggle:hover { color: #0d6efd; }
+        .password-wrapper { position: relative; }
+        .password-wrapper input { padding-right: 45px; }
         .blocked-message {
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            border-radius: 10px;
-            padding: 20px;
+            background-color: #f8d7da; border: 1px solid #f5c6cb;
+            border-radius: 10px; padding: 20px;
         }
+        #blockedMessage { display: none; }
     </style>
 </head>
 <body>
@@ -53,40 +33,33 @@
             </div>
             <div class="card-body p-4">
 
-                <!-- 🔥 MESSAGE DE BLOCAGE -->
-                <div th:if="${blocked}" class="alert alert-danger blocked-message">
+                <!-- 🔥 MESSAGE DE BLOCAGE (affiché par JavaScript) -->
+                <div id="blockedMessage" class="alert alert-danger blocked-message">
                     <div class="text-center">
                         <i class="fas fa-ban fa-3x text-danger mb-3"></i>
                         <h4 class="text-danger fw-bold">⛔ Compte bloqué</h4>
                         <hr>
-                        <p class="mb-0" style="font-size: 1.1rem;" th:text="${errorMessage}">
+                        <p id="blockedReason" class="mb-0" style="font-size: 1.1rem;">
                             Votre compte a été bloqué par l'administrateur.
                         </p>
                         <p class="text-muted small mt-3">
-                            <i class="fas fa-info-circle"></i>
-                            Contactez l'administrateur pour plus d'informations.
+                            <i class="fas fa-info-circle"></i> Contactez l'administrateur.
                         </p>
                     </div>
                 </div>
 
                 <!-- 🔥 MESSAGE D'ERREUR CLASSIQUE -->
-                <div th:if="${error}" class="alert alert-danger">
+                <div id="errorMessage" class="alert alert-danger" style="display: none;">
                     <i class="fas fa-exclamation-circle"></i>
                     <strong>Erreur de connexion</strong><br>
                     Nom d'utilisateur ou mot de passe incorrect.
                 </div>
 
-                <!-- 🔥 MESSAGE DE SUCCÈS APRÈS INSCRIPTION -->
+                <!-- Message de succès -->
                 <div th:if="${param.registered}" class="alert alert-success">
                     <i class="fas fa-check-circle"></i>
                     <strong>Inscription réussie !</strong><br>
-                    Votre compte a été créé avec succès. Connectez-vous maintenant.
-                </div>
-
-                <!-- Message de déconnexion -->
-                <div th:if="${param.logout}" class="alert alert-info">
-                    <i class="fas fa-info-circle"></i>
-                    Vous êtes déconnecté.
+                    Connectez-vous maintenant.
                 </div>
 
                 <form th:action="@{/login}" method="post" id="loginForm">
@@ -113,7 +86,7 @@
                                    name="password"
                                    required
                                    placeholder="Entrez votre mot de passe">
-                            <button type="button" class="password-toggle" id="togglePassword" aria-label="Afficher le mot de passe">
+                            <button type="button" class="password-toggle" id="togglePassword">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
@@ -126,8 +99,7 @@
 
                 <div class="text-center mt-3">
                     <p class="text-muted">
-                        Pas encore de compte ?
-                        <a href="/register" class="text-primary fw-bold">S'inscrire</a>
+                        Pas encore de compte ? <a href="/register" class="text-primary fw-bold">S'inscrire</a>
                     </p>
                 </div>
             </div>
@@ -135,26 +107,56 @@
     </div>
 </div>
 
-<!-- 🔥 SCRIPT POUR REDIRIGER AVEC LE USERNAME -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const loginForm = document.getElementById('loginForm');
         const usernameInput = document.getElementById('username');
-
-        if (loginForm && usernameInput) {
-            loginForm.addEventListener('submit', function(e) {
-                const username = usernameInput.value.trim();
-                if (username) {
-                    // Ajouter le username comme paramètre dans l'URL
-                    this.action = '/login?username=' + encodeURIComponent(username);
-                }
-            });
-        }
-
-        // Afficher/masquer le mot de passe
+        const loginForm = document.getElementById('loginForm');
+        const blockedMessage = document.getElementById('blockedMessage');
+        const errorMessage = document.getElementById('errorMessage');
         const togglePassword = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
 
+        // 🔥 VÉRIFIER LE BLOCAGE EN TEMPS RÉEL
+        usernameInput.addEventListener('blur', function() {
+            const username = this.value.trim();
+            if (username.length < 2) return;
+
+            fetch('/api/check-user?username=' + encodeURIComponent(username))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.blocked) {
+                        blockedMessage.style.display = 'block';
+                        errorMessage.style.display = 'none';
+                        document.getElementById('blockedReason').textContent =
+                            data.message || 'Votre compte a été bloqué par l\'administrateur.';
+                    } else {
+                        blockedMessage.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+        });
+
+        // 🔥 EMPÊCHER LA SOUMISSION SI BLOQUÉ
+        loginForm.addEventListener('submit', function(e) {
+            const username = usernameInput.value.trim();
+            if (username.length < 2) return;
+
+            // Vérifier une dernière fois
+            fetch('/api/check-user?username=' + encodeURIComponent(username))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.blocked) {
+                        e.preventDefault();
+                        blockedMessage.style.display = 'block';
+                        errorMessage.style.display = 'none';
+                        document.getElementById('blockedReason').textContent =
+                            data.message || 'Votre compte a été bloqué par l\'administrateur.';
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+        });
+
+        // Afficher/masquer le mot de passe
         if (togglePassword && passwordInput) {
             togglePassword.addEventListener('click', function() {
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
