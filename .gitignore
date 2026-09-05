@@ -24,4 +24,4 @@ logs/
 Thumbs.db
 
 # Données
-data/
+data/"data/" 
