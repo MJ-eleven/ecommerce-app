@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Shop - Boutique en ligne</title>
+    <title th:text="${pageTitle}">E-Shop</title>
 
     <!-- 🔥 ICÔNES POUR ÉCRAN D'ACCUEIL -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -45,8 +45,43 @@
             color: #667eea;
             font-weight: bold;
         }
-        .badge-cart {
-            font-size: 0.7rem;
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .search-box input {
+            border-radius: 30px 0 0 30px;
+            padding: 12px 20px;
+            border: 2px solid #dee2e6;
+        }
+        .search-box button {
+            border-radius: 0 30px 30px 0;
+            padding: 12px 25px;
+        }
+        .category-filter {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .category-filter:hover {
+            background-color: #e9ecef;
+        }
+        .category-filter.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .category-filter.active:hover {
+            background-color: #0b5ed7;
+            color: white;
+        }
+        .filter-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        .results-count {
+            color: #6c757d;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -109,44 +144,92 @@
     <div class="hero-section text-center">
         <h1><i class="fas fa-shopping-bag"></i> Bienvenue sur E-Shop</h1>
         <p class="lead">Découvrez notre sélection de produits exceptionnels</p>
-        <a href="/products" class="btn btn-light btn-lg">Voir les produits</a>
-    </div>
 
-    <!-- Section Catégories -->
-    <div class="mb-4">
-        <h3><i class="fas fa-tags"></i> Catégories</h3>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="/products" class="btn btn-outline-primary category-filter">
-                <i class="fas fa-th-large"></i> Tous
-            </a>
-            <a th:each="category : ${categories}"
-               th:href="@{/products(categoryId=${category.id})}"
-               class="btn btn-outline-primary category-filter"
-               th:text="${category.name}">
-                Catégorie
-            </a>
+        <!-- 🔥 BARRE DE RECHERCHE -->
+        <div class="search-box">
+            <form th:action="@{/}" method="get" class="d-flex">
+                <input type="text"
+                       name="keyword"
+                       class="form-control"
+                       placeholder="Rechercher un produit..."
+                       th:value="${keyword}">
+                <button type="submit" class="btn btn-light">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
         </div>
     </div>
 
-    <!-- Produits en vedette -->
-    <h2 class="mb-4"><i class="fas fa-star text-warning"></i> Produits en vedette</h2>
-    <div class="row g-4">
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3" th:each="product : ${products}">
-            <div class="card product-card">
-                <img th:src="${product.imageUrl}" class="card-img-top" th:alt="${product.name}"
-                     onerror="this.src='https://via.placeholder.com/300x200?text=Product'">
-                <div class="card-body">
-                    <h5 class="card-title" th:text="${product.name}">Nom</h5>
-                    <p class="card-text text-truncate" th:text="${product.description}">Description</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="h5 product-price" th:text="${currencyService.formatPrice(product.price)}">€0.00</span>
-                        <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-eye"></i> Voir
-                        </a>
+    <!-- 🔥 SECTION FILTRES ET RÉSULTATS -->
+    <div class="filter-section">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <strong><i class="fas fa-filter"></i> Filtres :</strong>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a th:href="@{/}"
+                   class="btn btn-outline-primary category-filter btn-sm"
+                   th:classappend="${categoryId == null and keyword == null ? 'active' : ''}">
+                    <i class="fas fa-th-large"></i> Tous
+                </a>
+                <a th:each="category : ${categories}"
+                   th:href="@{/(categoryId=${category.id}, keyword=${keyword})}"
+                   class="btn btn-outline-primary category-filter btn-sm"
+                   th:classappend="${categoryId == category.id ? 'active' : ''}"
+                   th:text="${category.name}">
+                    Catégorie
+                </a>
+            </div>
+            <div th:if="${keyword != null}" class="text-muted small">
+                <i class="fas fa-search"></i> Résultats pour "<span th:text="${keyword}">mot</span>"
+                <a th:href="@{/}" class="text-danger ms-1">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Résultats -->
+    <div th:if="${products != null and !products.empty}">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="results-count">
+                <span th:text="${products.size()}">0</span> produit(s) trouvé(s)
+            </h5>
+        </div>
+        <div class="row g-4">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3" th:each="product : ${products}">
+                <div class="card product-card">
+                    <img th:src="${product.imageUrl}" class="card-img-top" th:alt="${product.name}"
+                         onerror="this.src='https://via.placeholder.com/300x200?text=Product'">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${product.name}">Nom</h5>
+                        <p class="card-text text-truncate" th:text="${product.description}">Description</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 product-price" th:text="${currencyService.formatPrice(product.price)}">€0.00</span>
+                            <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i> Voir
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- 🔥 MESSAGE SI AUCUN PRODUIT -->
+    <div th:if="${products == null or products.empty}" class="text-center my-5">
+        <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+        <h4>Aucun produit trouvé</h4>
+        <p class="text-muted">Essayez d'autres mots-clés ou consultez toutes nos catégories.</p>
+        <a href="/" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Voir tous les produits
+        </a>
+    </div>
+
+    <!-- Produits en vedette (si pas de recherche) -->
+    <div th:if="${keyword == null and categoryId == null}" class="mt-4">
+        <h2 class="mb-4"><i class="fas fa-star text-warning"></i> Produits en vedette</h2>
+        <!-- Les produits sont déjà affichés ci-dessus -->
     </div>
 </div>
 

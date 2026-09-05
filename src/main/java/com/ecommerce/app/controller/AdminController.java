@@ -18,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +55,6 @@ public class AdminController {
     public String dashboard(Model model) {
         User currentUser = getCurrentUser();
 
-        // Statistiques globales
         long totalProducts = productRepository.count();
         long totalOrders = orderService.getAllOrders().size();
         long totalUsers = userRepository.count();
@@ -63,7 +63,6 @@ public class AdminController {
         long activeMerchants = totalMerchants - blockedMerchants;
         double totalRevenue = orderService.getTotalRevenue();
 
-        // 🔥 Convertir le chiffre d'affaires dans la devise actuelle
         BigDecimal convertedRevenue = currencyService.convert(BigDecimal.valueOf(totalRevenue));
 
         // 1. Ventes des 7 derniers jours
@@ -106,7 +105,7 @@ public class AdminController {
             topProductsValues.add((Long) row[1]);
         }
 
-        // 5. Évolution des inscriptions des 7 derniers jours
+        // 5. Évolution des inscriptions
         List<Object[]> userRegistrations = userRepository.findRegistrationsLast7Days();
         List<String> registrationLabels = new ArrayList<>();
         List<Long> registrationValues = new ArrayList<>();
@@ -128,7 +127,6 @@ public class AdminController {
         model.addAttribute("totalRevenue", totalRevenue);
         model.addAttribute("convertedRevenue", convertedRevenue);
 
-        // Données pour les graphiques
         model.addAttribute("salesLabels", salesLabels);
         model.addAttribute("salesData", salesValues);
         model.addAttribute("categoryLabels", categoryLabels);
@@ -173,12 +171,114 @@ public class AdminController {
         return "admin/merchants";
     }
 
+    // ============================================================
+    // 🔥 BLOCAGE TEMPORAIRE
+    // ============================================================
+    @PostMapping("/merchants/block-temporary/{id}")
+    public String blockTemporary(
+            @PathVariable Long id,
+            @RequestParam int duration,
+            @RequestParam String durationUnit,
+            @RequestParam String reason,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            User merchant = userRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Commerçant non trouvé"));
+
+            if (!merchant.getRole().equals("COMMERCANT")) {
+                redirectAttributes.addFlashAttribute("error", "❌ Cet utilisateur n'est pas un commerçant");
+                return "redirect:/admin/merchants";
+            }
+
+            LocalDateTime blockedUntil = LocalDateTime.now();
+            switch (durationUnit) {
+                case "HOURS":
+                    blockedUntil = blockedUntil.plus(duration, ChronoUnit.HOURS);
+                    break;
+                case "DAYS":
+                    blockedUntil = blockedUntil.plus(duration, ChronoUnit.DAYS);
+                    break;
+                case "WEEKS":
+                    blockedUntil = blockedUntil.plus(duration, ChronoUnit.WEEKS);
+                    break;
+                case "MONTHS":
+                    blockedUntil = blockedUntil.plus(duration, ChronoUnit.MONTHS);
+                    break;
+                default:
+                    blockedUntil = blockedUntil.plus(duration, ChronoUnit.DAYS);
+            }
+
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String adminName = auth.getName();
+
+            merchant.setEnabled(false);
+            merchant.setBlocked(true);
+            merchant.setBlockedUntil(blockedUntil);
+            merchant.setBlockedReason(reason);
+            merchant.setBlockedBy(adminName);
+            merchant.setBlockedAt(LocalDateTime.now());
+
+            userRepository.save(merchant);
+
+            redirectAttributes.addFlashAttribute("success",
+                    "✅ Commerçant bloqué temporairement jusqu'au " + blockedUntil.toString());
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "❌ Erreur : " + e.getMessage());
+        }
+        return "redirect:/admin/merchants";
+    }
+
+    // ============================================================
+    // 🔥 BLOCAGE DÉFINITIF
+    // ============================================================
+    @PostMapping("/merchants/block-permanent/{id}")
+    public String blockPermanent(
+            @PathVariable Long id,
+            @RequestParam String reason,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            User merchant = userRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Commerçant non trouvé"));
+
+            if (!merchant.getRole().equals("COMMERCANT")) {
+                redirectAttributes.addFlashAttribute("error", "❌ Cet utilisateur n'est pas un commerçant");
+                return "redirect:/admin/merchants";
+            }
+
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String adminName = auth.getName();
+
+            merchant.setEnabled(false);
+            merchant.setBlocked(true);
+            merchant.setBlockedUntil(null);
+            merchant.setBlockedReason(reason);
+            merchant.setBlockedBy(adminName);
+            merchant.setBlockedAt(LocalDateTime.now());
+
+            userRepository.save(merchant);
+
+            redirectAttributes.addFlashAttribute("success",
+                    "✅ Commerçant bloqué définitivement !");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "❌ Erreur : " + e.getMessage());
+        }
+        return "redirect:/admin/merchants";
+    }
+
+    // ============================================================
+    // 🔥 DÉBLOCAGE
+    // ============================================================
     @PostMapping("/merchants/unblock/{id}")
     public String unblockMerchant(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             User merchant = userRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Commerçant non trouvé"));
 
+            merchant.setEnabled(true);
             merchant.setBlocked(false);
             merchant.setBlockedUntil(null);
             merchant.setBlockedReason(null);
@@ -186,13 +286,19 @@ public class AdminController {
             merchant.setBlockedAt(null);
 
             userRepository.save(merchant);
-            redirectAttributes.addFlashAttribute("success", "✅ Commerçant débloqué avec succès !");
+
+            redirectAttributes.addFlashAttribute("success",
+                    "✅ Commerçant débloqué avec succès !");
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "❌ Erreur : " + e.getMessage());
         }
         return "redirect:/admin/merchants";
     }
 
+    // ============================================================
+    // 🔥 SUPPRIMER UN COMMERÇANT
+    // ============================================================
     @PostMapping("/merchants/delete/{id}")
     public String deleteMerchant(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
@@ -207,6 +313,7 @@ public class AdminController {
 
             userRepository.delete(merchant);
             redirectAttributes.addFlashAttribute("success", "✅ Commerçant supprimé avec succès !");
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "❌ Erreur : " + e.getMessage());
         }
@@ -214,7 +321,7 @@ public class AdminController {
     }
 
     // ============================================================
-    // GESTION DES COMMANDES (CONSULTATION UNIQUEMENT)
+    // GESTION DES COMMANDES
     // ============================================================
     @GetMapping("/orders")
     public String orders(Model model) {
