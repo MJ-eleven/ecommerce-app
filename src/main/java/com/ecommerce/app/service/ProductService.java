@@ -73,6 +73,7 @@ public class ProductService {
         return productRepository.findByCategoryId(categoryId);
     }
 
+    // 🔥 RECHERCHE PAR MOT-CLÉ ET CATÉGORIE
     public List<Product> searchByKeywordAndCategory(String keyword, Long categoryId) {
         return productRepository.findByNameContainingAndCategoryId(keyword, categoryId);
     }
@@ -82,7 +83,7 @@ public class ProductService {
     }
 
     // ============================================================
-    // 🔥 GESTION DES VARIANTES
+    // GESTION DES VARIANTES
     // ============================================================
 
     @Transactional
