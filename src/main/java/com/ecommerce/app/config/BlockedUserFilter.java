@@ -29,12 +29,16 @@ public class BlockedUserFilter extends OncePerRequestFilter {
             String username = request.getParameter("username");
 
             if (username != null && !username.isEmpty()) {
-                User user = userRepository.findByUsername(username).orElse(null);
+                try {
+                    User user = userRepository.findByUsername(username).orElse(null);
 
-                if (user != null && !user.isEnabled()) {
-                    System.out.println("❌ " + username + " est BLOQUÉ - Redirection vers login?error=blocked");
-                    response.sendRedirect("/login?error=blocked");
-                    return;
+                    if (user != null && !user.isEnabled()) {
+                        System.out.println("❌ " + username + " est BLOQUÉ - Redirection vers login?error=blocked");
+                        response.sendRedirect("/login?error=blocked");
+                        return;
+                    }
+                } catch (Exception e) {
+                    System.out.println("⚠️ Erreur lors de la vérification du blocage: " + e.getMessage());
                 }
             }
         }
