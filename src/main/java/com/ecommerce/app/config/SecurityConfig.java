@@ -15,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,14 +28,10 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
-    @Autowired
-    private BlockedUserFilter blockedUserFilter;
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .addFilterBefore(blockedUserFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
@@ -81,7 +76,13 @@ public class SecurityConfig {
                                                                 HttpServletResponse response,
                                                                 AuthenticationException exception)
                                     throws IOException, ServletException {
-                                response.sendRedirect("/login?error=true");
+                                String errorMessage = exception.getMessage();
+                                System.out.println("❌ EXCEPTION : " + errorMessage);
+                                if (errorMessage != null && errorMessage.equals("blocked")) {
+                                    response.sendRedirect("/login?error=blocked");
+                                } else {
+                                    response.sendRedirect("/login?error=true");
+                                }
                             }
                         })
                         .permitAll()
