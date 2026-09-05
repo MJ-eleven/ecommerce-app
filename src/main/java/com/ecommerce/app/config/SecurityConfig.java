@@ -36,6 +36,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                // 🔥 AJOUTER LE FILTRE AVANT LA CONNEXION
                 .addFilterBefore(blockedUserFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
