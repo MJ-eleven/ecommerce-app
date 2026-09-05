@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,16 +29,15 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
-    // 🔥 COMMENTEZ OU SUPPRIMEZ CETTE LIGNE
-    // @Autowired
-    // private BlockedUserFilter blockedUserFilter;
+    @Autowired
+    private BlockedUserFilter blockedUserFilter;  // 🔥 Ajouter
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                // 🔥 COMMENTEZ OU SUPPRIMEZ CETTE LIGNE
-                // .addFilterBefore(blockedUserFilter, UsernamePasswordAuthenticationFilter.class)
+                // 🔥 AJOUTER LE FILTRE AVANT LA CONNEXION
+                .addFilterBefore(blockedUserFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
@@ -84,7 +84,12 @@ public class SecurityConfig {
                                     throws IOException, ServletException {
                                 String errorMessage = exception.getMessage();
                                 System.out.println("❌ EXCEPTION : " + errorMessage);
-                                response.sendRedirect("/login?error=true");
+
+                                if (errorMessage != null && errorMessage.equals("blocked")) {
+                                    response.sendRedirect("/login?error=blocked");
+                                } else {
+                                    response.sendRedirect("/login?error=true");
+                                }
                             }
                         })
                         .permitAll()
