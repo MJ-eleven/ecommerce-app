@@ -70,14 +70,21 @@ public class SecurityConfig {
                                 }
                             }
                         })
+                        // 🔥 GESTIONNAIRE D'ÉCHEC POUR LE BLOCAGE
                         .failureHandler(new AuthenticationFailureHandler() {
                             @Override
                             public void onAuthenticationFailure(HttpServletRequest request,
                                                                 HttpServletResponse response,
                                                                 AuthenticationException exception)
                                     throws IOException, ServletException {
-                                // Toujours rediriger avec error=true
-                                response.sendRedirect("/login?error=true");
+                                String errorMessage = exception.getMessage();
+                                System.out.println("❌ ÉCHEC DE CONNEXION : " + errorMessage);
+
+                                if (errorMessage != null && errorMessage.equals("BLOCKED")) {
+                                    response.sendRedirect("/login?error=blocked");
+                                } else {
+                                    response.sendRedirect("/login?error=true");
+                                }
                             }
                         })
                         .permitAll()

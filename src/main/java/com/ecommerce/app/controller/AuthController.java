@@ -26,22 +26,17 @@ public class AuthController {
     public String login(
             @RequestParam(value = "error", required = false) String error,
             @RequestParam(value = "logout", required = false) String logout,
-            @RequestParam(value = "username", required = false) String username,
             Model model) {
 
-        System.out.println("🔍 PAGE LOGIN - error: " + error + ", username: " + username);
+        System.out.println("🔍 PAGE LOGIN - error: " + error);
 
-        // 🔥 VÉRIFIER LE BLOCAGE
-        if (username != null && !username.isEmpty()) {
-            User user = userRepository.findByUsername(username).orElse(null);
-            if (user != null && !user.isEnabled()) {
-                model.addAttribute("blocked", true);
-                System.out.println("🔴 " + username + " est BLOQUÉ !");
-            } else if (error != null) {
-                model.addAttribute("error", true);
-            }
+        // 🔥 MESSAGE DE BLOCAGE
+        if (error != null && error.equals("blocked")) {
+            model.addAttribute("blocked", true);
+            model.addAttribute("errorMessage", "Votre compte a été bloqué par l'administrateur. Veuillez contacter le support.");
         } else if (error != null) {
             model.addAttribute("error", true);
+            model.addAttribute("errorMessage", "Nom d'utilisateur ou mot de passe incorrect.");
         }
 
         if (logout != null) {
