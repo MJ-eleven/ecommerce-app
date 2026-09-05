@@ -73,7 +73,7 @@
                 <div th:if="${error}" class="alert alert-danger">
                     <i class="fas fa-exclamation-circle"></i>
                     <strong>Erreur de connexion</strong><br>
-                    <span th:text="${errorMessage}">Nom d'utilisateur ou mot de passe incorrect.</span>
+                    Nom d'utilisateur ou mot de passe incorrect.
                 </div>
 
                 <!-- 🔥 MESSAGE DE SUCCÈS APRÈS INSCRIPTION -->
@@ -89,7 +89,7 @@
                     Vous êtes déconnecté.
                 </div>
 
-                <form th:action="@{/login}" method="post">
+                <form th:action="@{/login}" method="post" id="loginForm">
                     <div class="mb-3">
                         <label for="username" class="form-label fw-bold">
                             <i class="fas fa-user"></i> Nom d'utilisateur
@@ -135,8 +135,23 @@
     </div>
 </div>
 
+<!-- 🔥 SCRIPT POUR REDIRIGER AVEC LE USERNAME -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('username');
+
+        if (loginForm && usernameInput) {
+            loginForm.addEventListener('submit', function(e) {
+                const username = usernameInput.value.trim();
+                if (username) {
+                    // Ajouter le username comme paramètre dans l'URL
+                    this.action = '/login?username=' + encodeURIComponent(username);
+                }
+            });
+        }
+
+        // Afficher/masquer le mot de passe
         const togglePassword = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
 
