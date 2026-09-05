@@ -24,14 +24,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé"));
 
-        System.out.println("🔍 Connexion de: " + username);
-        System.out.println("   enabled: " + user.isEnabled());
-
         // 🔥 VÉRIFICATION DU BLOCAGE
         if (!user.isEnabled()) {
-            System.out.println("❌ " + username + " est BLOQUÉ !");
-            // Lancer une exception avec un message spécifique
-            throw new UsernameNotFoundException("BLOCKED");
+            throw new UsernameNotFoundException("blocked");
         }
 
         List<GrantedAuthority> authorities = new ArrayList<>();
