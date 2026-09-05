@@ -25,7 +25,8 @@ public class Product {
     @Column(name = "stock_quantity")
     private int stockQuantity = 0;
 
-    @Column(name = "image_url", length = 5000)
+    // 🔥 FIX : Utiliser TEXT au lieu de VARCHAR(5000)
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
     @ManyToOne
@@ -47,6 +48,10 @@ public class Product {
 
     @Column(name = "attribute_values")
     private String attributeValues;
+
+    // ============================================================
+    // CONSTRUCTEURS
+    // ============================================================
 
     public Product() {}
 
@@ -90,12 +95,8 @@ public class Product {
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
 
-    public List<ProductVariant> getVariants() {
-        return variants;
-    }
-    public void setVariants(List<ProductVariant> variants) {
-        this.variants = variants;
-    }
+    public List<ProductVariant> getVariants() { return variants; }
+    public void setVariants(List<ProductVariant> variants) { this.variants = variants; }
 
     public String getAvailableAttributes() { return availableAttributes; }
     public void setAvailableAttributes(String availableAttributes) { this.availableAttributes = availableAttributes; }
