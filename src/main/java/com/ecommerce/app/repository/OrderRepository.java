@@ -47,10 +47,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // STATISTIQUES POUR LE COMMERCANT
     // ============================================================
 
-    // 1. Ventes des 7 derniers jours (commerçant)
-    @Query("SELECT FORMATDATETIME(o.orderDate, 'yyyy-MM-dd') as date, SUM(o.totalAmount) as total " +
-            "FROM Order o WHERE o.merchant.id = :merchantId AND o.status != 'ANNULÉE' " +
-            "AND o.orderDate >= :startDate GROUP BY FORMATDATETIME(o.orderDate, 'yyyy-MM-dd') ORDER BY date ASC")
+    // 1. Ventes des 7 derniers jours (commerçant) - Version PostgreSQL
+    @Query(value = "SELECT TO_CHAR(o.order_date, 'YYYY-MM-DD') as date, SUM(o.total_amount) as total " +
+            "FROM orders o WHERE o.merchant_id = :merchantId AND o.status != 'ANNULÉE' " +
+            "AND o.order_date >= :startDate GROUP BY TO_CHAR(o.order_date, 'YYYY-MM-DD') ORDER BY date ASC",
+            nativeQuery = true)
     List<Object[]> findSalesLast7Days(@Param("merchantId") Long merchantId,
                                       @Param("startDate") LocalDateTime startDate);
 
@@ -84,17 +85,18 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Long countPendingOrdersByMerchant(@Param("merchantId") Long merchantId);
 
     // ============================================================
-    // 📊 STATISTIQUES GLOBALES POUR L'ADMIN
+    // 📊 STATISTIQUES GLOBALES POUR L'ADMIN - Version PostgreSQL
     // ============================================================
 
     // 1. Revenus totaux (global)
     @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status != 'ANNULÉE'")
     Double findTotalRevenue();
 
-    // 2. Ventes des 7 derniers jours (global)
-    @Query("SELECT FORMATDATETIME(o.orderDate, 'yyyy-MM-dd') as date, SUM(o.totalAmount) as total " +
-            "FROM Order o WHERE o.status != 'ANNULÉE' AND o.orderDate >= :startDate " +
-            "GROUP BY FORMATDATETIME(o.orderDate, 'yyyy-MM-dd') ORDER BY date ASC")
+    // 2. Ventes des 7 derniers jours (global) - Version PostgreSQL
+    @Query(value = "SELECT TO_CHAR(o.order_date, 'YYYY-MM-DD') as date, SUM(o.total_amount) as total " +
+            "FROM orders o WHERE o.status != 'ANNULÉE' AND o.order_date >= :startDate " +
+            "GROUP BY TO_CHAR(o.order_date, 'YYYY-MM-DD') ORDER BY date ASC",
+            nativeQuery = true)
     List<Object[]> findGlobalSalesLast7Days(@Param("startDate") LocalDateTime startDate);
 
     // 3. Ventes par catégorie (global)

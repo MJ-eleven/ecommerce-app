@@ -49,11 +49,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findMerchantsWithExpiredBlock(@Param("now") LocalDateTime now);
 
     // ============================================================
-    // 📊 STATISTIQUES D'INSCRIPTION POUR L'ADMIN
+    // 📊 STATISTIQUES D'INSCRIPTION POUR L'ADMIN - Version PostgreSQL
     // ============================================================
-    @Query("SELECT FORMATDATETIME(u.createdAt, 'yyyy-MM-dd') as date, COUNT(u) " +
-            "FROM User u WHERE u.createdAt >= :startDate " +
-            "GROUP BY FORMATDATETIME(u.createdAt, 'yyyy-MM-dd') ORDER BY date ASC")
+    @Query(value = "SELECT TO_CHAR(u.created_at, 'YYYY-MM-DD') as date, COUNT(u) " +
+            "FROM users u WHERE u.created_at >= :startDate " +
+            "GROUP BY TO_CHAR(u.created_at, 'YYYY-MM-DD') ORDER BY date ASC",
+            nativeQuery = true)
     List<Object[]> findRegistrationsLast7Days(@Param("startDate") LocalDateTime startDate);
 
     // Version sans paramètre (utilise 7 jours par défaut)
