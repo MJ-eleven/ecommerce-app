@@ -30,7 +30,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         // 🔥 VÉRIFICATION DU BLOCAGE
         if (!user.isEnabled()) {
             System.out.println("❌ " + username + " est BLOQUÉ !");
-            throw new UsernameNotFoundException("blocked");
+            // Lancer une exception avec un message spécifique
+            throw new UsernameNotFoundException("BLOCKED");
         }
 
         List<GrantedAuthority> authorities = new ArrayList<>();

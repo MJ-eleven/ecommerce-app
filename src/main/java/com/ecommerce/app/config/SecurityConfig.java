@@ -77,10 +77,13 @@ public class SecurityConfig {
                                                                 AuthenticationException exception)
                                     throws IOException, ServletException {
                                 String errorMessage = exception.getMessage();
-                                System.out.println("❌ EXCEPTION : " + errorMessage);
-                                if (errorMessage != null && errorMessage.equals("blocked")) {
+                                System.out.println("❌ ERREUR DE CONNEXION : " + errorMessage);
+                                // 🔥 Vérifier si le message contient "BLOCKED"
+                                if (errorMessage != null && errorMessage.contains("BLOCKED")) {
+                                    System.out.println("🔴 REDIRECTION VERS BLOCKED");
                                     response.sendRedirect("/login?error=blocked");
                                 } else {
+                                    System.out.println("🔴 REDIRECTION VERS ERROR=true");
                                     response.sendRedirect("/login?error=true");
                                 }
                             }
