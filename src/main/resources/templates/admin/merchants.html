@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Gestion des commerçants</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/"><i class="fas fa-store"></i> E-Shop Admin</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/admin/dashboard">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/products">Produits</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/admin/merchants">Commerçants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/orders">Commandes</a></li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/logout">Déconnexion</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <h1 class="mb-4"><i class="fas fa-users-cog"></i> Gestion des commerçants</h1>
+
+    <div th:if="${success}" class="alert alert-success">
+        <span th:text="${success}">Succès</span>
+    </div>
+    <div th:if="${error}" class="alert alert-danger">
+        <span th:text="${error}">Erreur</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="merchant : ${merchants}">
+                <td th:text="${merchant.username}">Nom</td>
+                <td th:text="${merchant.email}">Email</td>
+                <td>
+                    <span th:if="${merchant.enabled}" class="badge bg-success">✅ Actif</span>
+                    <span th:unless="${merchant.enabled}" class="badge bg-danger">❌ Bloqué</span>
+                </td>
+                <td>
+                    <!-- 🔓 DÉBLOQUER -->
+                    <form th:if="${!merchant.enabled}"
+                          th:action="@{/admin/merchants/unblock/{id}(id=${merchant.id})}"
+                          method="post"
+                          class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-success">
+                            <i class="fas fa-unlock"></i> Débloquer
+                        </button>
+                    </form>
+
+                    <!-- 🔒 BLOCAGE TEMPORAIRE -->
+                    <button type="button"
+                            class="btn btn-sm btn-warning"
+                            th:if="${merchant.enabled}"
+                            data-bs-toggle="modal"
+                            th:data-bs-target="'#blockModal' + ${merchant.id}">
+                        <i class="fas fa-clock"></i> Bloquer
+                    </button>
+
+                    <!-- 🔒 BLOCAGE DÉFINITIF -->
+                    <button type="button"
+                            class="btn btn-sm btn-danger"
+                            th:if="${merchant.enabled}"
+                            data-bs-toggle="modal"
+                            th:data-bs-target="'#blockPermanentModal' + ${merchant.id}">
+                        <i class="fas fa-ban"></i> Bannir
+                    </button>
+
+                    <!-- 🗑️ SUPPRIMER -->
+                    <form th:action="@{/admin/merchants/delete/{id}(id=${merchant.id})}"
+                          method="post"
+                          class="d-inline"
+                          onsubmit="return confirm('Supprimer ce commerçant ?')">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${merchants.empty}">
+                <td colspan="4" class="text-center text-muted py-4">
+                    Aucun commerçant inscrit pour le moment
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL BLOCAGE TEMPORAIRE -->
+<!-- ============================================================ -->
+<div th:each="merchant : ${merchants}" class="modal fade" th:id="'blockModal' + ${merchant.id}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/admin/merchants/block-temporary/{id}(id=${merchant.id})}" method="post">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">Bloquage temporaire</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Commerçant :</strong> <span th:text="${merchant.username}">username</span></p>
+
+                    <div class="mb-3">
+                        <label class="form-label">Durée</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="number" class="form-control" name="duration" value="1" min="1" required>
+                            </div>
+                            <div class="col-6">
+                                <select class="form-select" name="durationUnit" required>
+                                    <option value="HOURS">Heure(s)</option>
+                                    <option value="DAYS" selected>Jour(s)</option>
+                                    <option value="WEEKS">Semaine(s)</option>
+                                    <option value="MONTHS">Mois</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Raison</label>
+                        <textarea class="form-control" name="reason" rows="2" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-warning">Bloquer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL BLOCAGE DÉFINITIF -->
+<!-- ============================================================ -->
+<div th:each="merchant : ${merchants}" class="modal fade" th:id="'blockPermanentModal' + ${merchant.id}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/admin/merchants/block-permanent/{id}(id=${merchant.id})}" method="post">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Bannissement définitif</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <strong>Attention !</strong> Cette action est irréversible.
+                    </div>
+                    <p><strong>Commerçant :</strong> <span th:text="${merchant.username}">username</span></p>
+
+                    <div class="mb-3">
+                        <label class="form-label">Raison</label>
+                        <textarea class="form-control" name="reason" rows="2" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">Bannir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

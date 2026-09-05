@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Validation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .whatsapp-btn {
+            background-color: #25D366;
+            color: white;
+            border: none;
+            transition: all 0.3s;
+        }
+        .whatsapp-btn:hover {
+            background-color: #1da851;
+            color: white;
+            transform: scale(1.02);
+        }
+        .whatsapp-btn i {
+            font-size: 1.2rem;
+        }
+        .location-info {
+            border-left: 4px solid #25D366;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .share-section {
+            border-top: 2px dashed #dee2e6;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/"><i class="fas fa-store"></i> E-Shop</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Accueil</a></li>
+                <li class="nav-item"><a class="nav-link" href="/products">Produits</a></li>
+                <li class="nav-item"><a class="nav-link" href="/cart">Panier</a></li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" href="/orders">
+                        <i class="fas fa-list"></i> Mes commandes
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="currencyDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span th:text="${currencyService != null ? currencyService.getSymbol() : '€'}">€</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="currencyDropdown">
+                        <li><a class="dropdown-item" th:href="@{/currency/switch(currency='EUR', redirect=${currentUrl})}">€ Euro</a></li>
+                        <li><a class="dropdown-item" th:href="@{/currency/switch(currency='USD', redirect=${currentUrl})}">$ Dollar</a></li>
+                        <li><a class="dropdown-item" th:href="@{/currency/switch(currency='XOF', redirect=${currentUrl})}">CFA Franc CFA</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <h1 class="mb-4"><i class="fas fa-clipboard-check"></i> Validation de la commande</h1>
+
+    <div class="row">
+        <!-- Formulaire -->
+        <div class="col-12 col-lg-7">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user"></i> Informations de livraison</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/order/create}" method="post" id="orderForm">
+                        <div class="mb-3">
+                            <label for="customerName" class="form-label fw-bold">Nom complet *</label>
+                            <input type="text" class="form-control" id="customerName" name="customerName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="customerEmail" class="form-label fw-bold">Email *</label>
+                            <input type="email" class="form-control" id="customerEmail" name="customerEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="customerPhone" class="form-label fw-bold">Téléphone *</label>
+                            <input type="tel" class="form-control" id="customerPhone" name="customerPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="shippingAddress" class="form-label fw-bold">Adresse de livraison *</label>
+                            <textarea class="form-control" id="shippingAddress" name="shippingAddress" rows="3" required></textarea>
+                        </div>
+
+                        <!-- SECTION PARTAGE LOCALISATION -->
+                        <div class="share-section">
+                            <h6 class="fw-bold mb-3">
+                                <i class="fas fa-share-alt"></i> Partager votre localisation
+                            </h6>
+                            <p class="text-muted small">
+                                Cliquez sur le bouton ci-dessous pour partager votre localisation via WhatsApp.
+                                Un message pré-rempli sera envoyé avec les détails de votre commande.
+                            </p>
+
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn whatsapp-btn btn-lg" id="whatsappShareBtn">
+                                    <i class="fab fa-whatsapp"></i> Partager la localisation sur WhatsApp
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="copyLocationBtn">
+                                    <i class="fas fa-copy"></i> Copier l'adresse
+                                </button>
+                            </div>
+
+                            <div class="location-info mt-3" id="locationDisplay">
+                                <i class="fas fa-map-pin text-success"></i>
+                                <span id="locationText">Aucune localisation partagée pour le moment</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check"></i> Confirmer la commande
+                            </button>
+                            <a href="/cart" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Retour au panier
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Récapitulatif -->
+        <div class="col-12 col-lg-5">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-shopping-cart"></i> Récapitulatif</h5>
+                </div>
+                <div class="card-body">
+                    <div th:each="item : ${cartItems}" class="d-flex justify-content-between mb-2">
+                        <span th:text="${item.quantity} + 'x ' + ${item.product.name}">1x Produit</span>
+                        <span th:text="${currencyService.formatPrice(item.totalPrice)}">€0</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Total</span>
+                        <span class="text-primary" th:text="${currencyService.formatPrice(totalPrice)}">€0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function generateWhatsAppMessage() {
+        const name = document.getElementById('customerName').value || 'Client';
+        const phone = document.getElementById('customerPhone').value || 'Non renseigné';
+        const address = document.getElementById('shippingAddress').value || 'Adresse non renseignée';
+
+        const items = [];
+        document.querySelectorAll('.d-flex.justify-content-between.mb-2').forEach(el => {
+            const text = el.querySelector('span:first-child')?.textContent || '';
+            const price = el.querySelector('span:last-child')?.textContent || '';
+            if (text && price) {
+                items.push(text + ' - ' + price);
+            }
+        });
+
+        const itemsList = items.join('\n');
+        const total = document.querySelector('.fw-bold .text-primary')?.textContent || '€0';
+
+        const message = `🛒 *NOUVELLE COMMANDE* 🛒
+
+👤 *Client :* ${name}
+📞 *Téléphone :* ${phone}
+📍 *Adresse :* ${address}
+
+📦 *Articles commandés :*
+${itemsList}
+
+💰 *Total :* ${total}
+
+📍 *Localisation :*
+Partagez votre position ici 👇
+https://maps.google.com/?q=${encodeURIComponent(address)}
+
+📱 *Contact :* ${phone}`;
+
+        return encodeURIComponent(message);
+    }
+
+    document.getElementById('whatsappShareBtn')?.addEventListener('click', function() {
+        const phoneNumber = document.getElementById('customerPhone').value;
+        const address = document.getElementById('shippingAddress').value;
+
+        if (!phoneNumber || !address) {
+            alert('⚠️ Veuillez remplir votre numéro de téléphone et votre adresse avant de partager.');
+            return;
+        }
+
+        const message = generateWhatsAppMessage();
+        const whatsappUrl = `https://wa.me/${phoneNumber.replace(/\s/g, '')}?text=${message}`;
+
+        window.open(whatsappUrl, '_blank');
+        document.getElementById('locationText').textContent = '📍 Localisation partagée : ' + address;
+        document.getElementById('locationDisplay').style.borderLeftColor = '#25D366';
+    });
+
+    document.getElementById('copyLocationBtn')?.addEventListener('click', function() {
+        const address = document.getElementById('shippingAddress').value;
+        if (!address) {
+            alert('⚠️ Veuillez entrer une adresse de livraison.');
+            return;
+        }
+
+        navigator.clipboard.writeText(address).then(() => {
+            alert('✅ Adresse copiée dans le presse-papier !');
+            document.getElementById('locationText').textContent = '📋 Adresse copiée : ' + address;
+        }).catch(() => {
+            const textarea = document.createElement('textarea');
+            textarea.value = address;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('✅ Adresse copiée dans le presse-papier !');
+        });
+    });
+
+    document.getElementById('shippingAddress')?.addEventListener('input', function() {
+        if (this.value) {
+            document.getElementById('locationText').textContent = '📍 Adresse saisie : ' + this.value;
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

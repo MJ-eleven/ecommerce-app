@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Détail</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .variant-option {
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            padding: 12px 16px;
+            text-align: center;
+            background: white;
+            height: 100%;
+        }
+        .variant-option:hover {
+            border-color: #0d6efd;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .variant-option.active {
+            border-color: #0d6efd;
+            background-color: #e7f1ff;
+            box-shadow: 0 4px 15px rgba(13,110,253,0.2);
+        }
+        .variant-option img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+        .variant-option .variant-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .variant-option .variant-price {
+            color: #0d6efd;
+            font-weight: 700;
+        }
+        .variant-option .variant-stock {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        .variant-option .check-mark {
+            display: none;
+            color: #198754;
+            font-size: 1.2rem;
+        }
+        .variant-option.active .check-mark {
+            display: inline;
+        }
+        .variant-option.default-option {
+            border-style: dashed;
+        }
+        .variant-option.default-option.active {
+            border-style: solid;
+        }
+        .variant-image-main {
+            max-height: 450px;
+            width: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            transition: all 0.5s;
+        }
+        .btn-back-to-product {
+            border: 2px dashed #6c757d;
+            color: #6c757d;
+            background: transparent;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .btn-back-to-product:hover {
+            border-color: #0d6efd;
+            color: #0d6efd;
+            background: #f8f9fa;
+        }
+        @media (max-width: 576px) {
+            .variant-option img {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/"><i class="fas fa-store"></i> E-Shop</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Accueil</a></li>
+                <li class="nav-item"><a class="nav-link" href="/products">Produits</a></li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" href="/orders">
+                        <i class="fas fa-list"></i> Mes commandes
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/cart" th:href="@{/cart}">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="badge bg-danger" th:text="${cartService != null ? cartService.totalItems : 0}">0</span>
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="currencyDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span th:text="${currencyService != null ? currencyService.getSymbol() : '€'}">€</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="currencyDropdown">
+                        <li><a class="dropdown-item" th:href="@{/currency/switch(currency='EUR', redirect=${currentUrl})}">€ Euro</a></li>
+                        <li><a class="dropdown-item" th:href="@{/currency/switch(currency='USD', redirect=${currentUrl})}">$ Dollar</a></li>
+                        <li><a class="dropdown-item" th:href="@{/currency/switch(currency='XOF', redirect=${currentUrl})}">CFA Franc CFA</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item" sec:authorize="!isAuthenticated()">
+                    <a class="nav-link" href="/login"><i class="fas fa-sign-in-alt"></i> Connexion</a>
+                </li>
+                <li class="nav-item" sec:authorize="!isAuthenticated()">
+                    <a class="nav-link" href="/register"><i class="fas fa-user-plus"></i> Inscription</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <div th:if="${param.added}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> Produit ajouté au panier avec succès !
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> <span th:text="${error}">Erreur</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row">
+        <!-- IMAGE PRINCIPALE -->
+        <div class="col-12 col-md-6 mb-4">
+            <img id="mainImage"
+                 th:src="${product.imageUrl}"
+                 th:alt="${product.name}"
+                 class="variant-image-main"
+                 onerror="this.src='https://via.placeholder.com/600x400?text=Product'">
+        </div>
+
+        <div class="col-12 col-md-6">
+            <h1 th:text="${product.name}">Nom</h1>
+            <div class="mb-3">
+                <span class="badge bg-primary" th:text="${product.category.name}">Catégorie</span>
+                <span class="badge bg-success" th:text="'Stock: ' + ${product.stockQuantity}">Stock</span>
+                <span th:if="${hasVariants}" class="badge bg-info">Plusieurs variantes</span>
+            </div>
+            <p class="lead" th:text="${product.description}">Description</p>
+            <h2 id="variantPrice" class="text-primary mb-4" th:text="${currencyService.formatPrice(product.price)}">€0.00</h2>
+
+            <!-- SÉLECTION DES VARIANTES -->
+            <div th:if="${hasVariants}" class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <label class="form-label fw-bold mb-0">Choisissez une variante :</label>
+                    <button class="btn-back-to-product" id="backToDefaultBtn" title="Revenir au produit de base">
+                        <i class="fas fa-undo-alt"></i> Produit de base
+                    </button>
+                </div>
+
+                <div class="row g-3">
+                    <!-- OPTION PRODUIT DE BASE -->
+                    <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="variant-option default-option active"
+                             id="defaultVariantOption"
+                             onclick="selectDefaultVariant()">
+                            <i class="fas fa-star text-warning mb-1" style="font-size: 1.5rem;"></i>
+                            <div class="variant-name">Original</div>
+                            <div class="variant-price" th:text="${currencyService.formatPrice(product.price)}">€0</div>
+                            <div class="variant-stock" th:text="'Stock: ' + ${product.stockQuantity}">Stock</div>
+                            <div class="check-mark"><i class="fas fa-check-circle"></i></div>
+                        </div>
+                    </div>
+
+                    <!-- VARIANTES -->
+                    <div class="col-12 col-sm-6 col-lg-4" th:each="variant : ${variants}">
+                        <div class="variant-option"
+                             th:data-variant-id="${variant.id}"
+                             th:data-price="${variant.price}"
+                             th:data-image="${variant.imageUrl != null ? variant.imageUrl : product.imageUrl}"
+                             th:data-stock="${variant.stockQuantity}"
+                             th:data-name="${variant.name}"
+                             onclick="selectVariant(this)">
+                            <img th:src="${variant.imageUrl != null ? variant.imageUrl : product.imageUrl}"
+                                 th:alt="${variant.name}"
+                                 onerror="this.src='https://via.placeholder.com/80x80?text=Image'">
+                            <div class="variant-name" th:text="${variant.name}">Nom</div>
+                            <div class="variant-price" th:text="${currencyService.formatPrice(variant.price)}">€0</div>
+                            <div class="variant-stock" th:text="'Stock: ' + ${variant.stockQuantity}">Stock</div>
+                            <div class="check-mark"><i class="fas fa-check-circle"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulaire d'ajout au panier -->
+            <form th:action="@{/products/{id}/add-to-cart(id=${product.id})}"
+                  method="post"
+                  class="d-flex align-items-center gap-2 flex-wrap">
+                <div class="d-flex align-items-center gap-2">
+                    <label for="quantity" class="fw-bold">Quantité :</label>
+                    <input type="number"
+                           id="quantity"
+                           name="quantity"
+                           value="1"
+                           min="1"
+                           max="10"
+                           class="form-control form-control-lg"
+                           style="width: 80px;">
+                </div>
+                <input type="hidden" name="variantId" id="selectedVariantId" value="-1">
+                <button type="submit" class="btn btn-primary btn-lg" id="addToCartBtn">
+                    <i class="fas fa-cart-plus"></i> Ajouter au panier
+                </button>
+            </form>
+
+            <div class="mt-3">
+                <a href="/products" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function selectDefaultVariant() {
+        document.querySelectorAll('.variant-option').forEach(opt => {
+            opt.classList.remove('active');
+        });
+        document.getElementById('defaultVariantOption').classList.add('active');
+
+        const price = parseFloat('[[${product.price}]]');
+        const image = '[[${product.imageUrl}]]';
+        const stock = parseInt('[[${product.stockQuantity}]]');
+
+        document.getElementById('mainImage').src = image;
+        document.getElementById('variantPrice').textContent =
+            document.getElementById('variantPrice').textContent.replace(/[\d,.]*$/, '') + ' ' + price.toFixed(2);
+        document.getElementById('selectedVariantId').value = -1;
+        document.getElementById('addToCartBtn').title = 'Ajouter le produit de base au panier';
+    }
+
+    function selectVariant(element) {
+        document.querySelectorAll('.variant-option').forEach(opt => {
+            opt.classList.remove('active');
+        });
+        element.classList.add('active');
+
+        const variantId = element.dataset.variantId;
+        const price = parseFloat(element.dataset.price);
+        const image = element.dataset.image;
+        const stock = element.dataset.stock;
+        const name = element.dataset.name;
+
+        document.getElementById('mainImage').src = image;
+        document.getElementById('variantPrice').textContent =
+            document.getElementById('variantPrice').textContent.replace(/[\d,.]*$/, '') + ' ' + price.toFixed(2);
+        document.getElementById('selectedVariantId').value = variantId;
+        document.getElementById('addToCartBtn').title = 'Ajouter ' + name + ' au panier';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('backToDefaultBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            selectDefaultVariant();
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

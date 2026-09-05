@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Variantes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/"><i class="fas fa-store"></i> E-Shop Commerçant</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/merchant/dashboard">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="/merchant/products">Mes produits</a></li>
+                <li class="nav-item"><a class="nav-link" href="/merchant/categories">Mes catégories</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/merchant/variants/product/${product.id}">Variantes</a></li>
+                <li class="nav-item"><a class="nav-link" href="/merchant/orders">Commandes</a></li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/logout">Déconnexion</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i class="fas fa-layer-group"></i> Variantes de
+            <span class="text-primary" th:text="${product.name}">Produit</span>
+        </h1>
+        <a th:href="@{/merchant/variants/add/{id}(id=${product.id})}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Ajouter une variante
+        </a>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+        <span th:text="${success}">Succès</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+        <span th:text="${error}">Erreur</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>Image</th>
+                <th>Nom</th>
+                <th>Attribut 1</th>
+                <th>Attribut 2</th>
+                <th>Prix</th>
+                <th>Stock</th>
+                <th>SKU</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="variant : ${variants}">
+                <td>
+                    <img th:src="${variant.imageUrl != null ? variant.imageUrl : product.imageUrl}"
+                         th:alt="${variant.name}"
+                         style="width:50px; height:50px; object-fit:cover;"
+                         class="rounded"
+                         onerror="this.src='https://via.placeholder.com/50x50?text=Image'">
+                </td>
+                <td th:text="${variant.name}">Nom</td>
+                <td th:text="${variant.attribute1}">Attribut 1</td>
+                <td th:text="${variant.attribute2}">Attribut 2</td>
+                <td th:text="${currencyService.formatPrice(variant.price)}">€0</td>
+                <td th:text="${variant.stockQuantity}">0</td>
+                <td th:text="${variant.sku}">SKU</td>
+                <td>
+                    <!-- 🔥 BOUTON MODIFIER -->
+                    <a th:href="@{/merchant/variants/edit/{id}(id=${variant.id})}"
+                       class="btn btn-sm btn-primary" title="Modifier">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <!-- 🔥 BOUTON SUPPRIMER -->
+                    <a th:href="@{/merchant/variants/delete/{id}(id=${variant.id})}"
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('Supprimer cette variante ?')"
+                       title="Supprimer">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                </td>
+            </tr>
+            <tr th:if="${variants.empty}">
+                <td colspan="8" class="text-center text-muted py-4">
+                    <i class="fas fa-layer-group fa-2x d-block mb-2"></i>
+                    Aucune variante pour ce produit
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <a href="/merchant/products" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Retour aux produits
+    </a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Mes catégories</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/"><i class="fas fa-store"></i> E-Shop Commerçant</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/merchant/dashboard">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="/merchant/products">Mes produits</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/merchant/categories">Mes catégories</a></li>
+                <li class="nav-item"><a class="nav-link" href="/merchant/orders">Commandes</a></li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/logout">Déconnexion</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-tags"></i> Mes catégories</h1>
+        <a href="/merchant/categories/add" class="btn btn-success">
+            <i class="fas fa-plus"></i> Ajouter une catégorie
+        </a>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success">
+        <span th:text="${success}">Succès</span>
+    </div>
+    <div th:if="${error}" class="alert alert-danger">
+        <span th:text="${error}">Erreur</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Description</th>
+                <th>Attributs</th>
+                <th>Produits</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="category : ${categories}">
+                <td th:text="${category.id}">1</td>
+                <td><span class="badge bg-primary" th:text="${category.name}">Nom</span></td>
+                <td th:text="${category.description}">Description</td>
+                <td>
+                    <span th:text="${category.attributeNames}">Attributs</span>
+                    <br>
+                    <small class="text-muted" th:text="${category.attributeValues}">Valeurs</small>
+                </td>
+                <td>
+                    <span class="badge bg-secondary" th:text="${category.products.size()}">0</span>
+                </td>
+                <td>
+                    <a th:href="@{/merchant/categories/edit/{id}(id=${category.id})}"
+                       class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a th:href="@{/merchant/categories/delete/{id}(id=${category.id})}"
+                       class="btn btn-sm btn-danger"
+                       th:unless="${category.products.size() > 0}"
+                       onclick="return confirm('Supprimer cette catégorie ?')">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                    <span th:if="${category.products.size() > 0}"
+                          class="text-muted small"
+                          title="Cette catégorie contient des produits">
+                                <i class="fas fa-lock"></i> Non supprimable
+                            </span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:if="${categories.empty}" class="text-center my-5">
+        <i class="fas fa-tags fa-4x text-muted mb-3"></i>
+        <p class="lead">Aucune catégorie pour le moment</p>
+        <a href="/merchant/categories/add" class="btn btn-success">
+            <i class="fas fa-plus"></i> Ajouter votre première catégorie
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

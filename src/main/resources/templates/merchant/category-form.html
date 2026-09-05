@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Formulaire catégorie</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/"><i class="fas fa-store"></i> E-Shop Commerçant</a>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <h1 class="mb-4">
+            <span th:if="${category.id == null}">
+                <i class="fas fa-plus"></i> Ajouter une catégorie
+            </span>
+        <span th:if="${category.id != null}">
+                <i class="fas fa-edit"></i> Modifier la catégorie
+            </span>
+    </h1>
+
+    <div class="row">
+        <div class="col-12 col-md-8 col-lg-6">
+            <form th:action="${category.id == null ? '/merchant/categories/save' : '/merchant/categories/update/' + category.id}"
+                  method="post"
+                  class="card p-4">
+
+                <input type="hidden" name="id" th:value="${category.id}">
+
+                <div class="mb-3">
+                    <label for="name" class="form-label fw-bold">
+                        <i class="fas fa-tag"></i> Nom de la catégorie *
+                    </label>
+                    <input type="text"
+                           class="form-control"
+                           id="name"
+                           name="name"
+                           th:value="${category.name}"
+                           required
+                           placeholder="Ex: Électronique">
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label fw-bold">
+                        <i class="fas fa-align-left"></i> Description
+                    </label>
+                    <textarea class="form-control"
+                              id="description"
+                              name="description"
+                              th:text="${category.description}"
+                              rows="4"
+                              placeholder="Description de la catégorie"></textarea>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                    <a href="/merchant/categories" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - E-Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .register-container {
+            max-width: 500px;
+            margin: 40px auto;
+        }
+        .register-card {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .role-card {
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        .role-card:hover {
+            border-color: #28a745;
+            background-color: #f8f9fa;
+        }
+        .role-card.active {
+            border-color: #28a745;
+            background-color: #e8f5e9;
+        }
+        .role-card i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .role-card .role-title {
+            font-weight: bold;
+        }
+        .role-card .role-desc {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        .role-selector {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="register-container">
+        <div class="card register-card">
+            <div class="card-header bg-success text-white text-center py-4">
+                <i class="fas fa-user-plus fa-3x"></i>
+                <h3 class="mt-2">Inscription</h3>
+                <p class="mb-0">Créez votre compte E-Shop</p>
+            </div>
+            <div class="card-body p-4">
+                <!-- Message d'erreur -->
+                <div th:if="${error}" class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span th:text="${error}">Erreur</span>
+                </div>
+
+                <form th:action="@{/register}" method="post">
+                    <!-- Nom d'utilisateur -->
+                    <div class="mb-3">
+                        <label for="username" class="form-label fw-bold">
+                            <i class="fas fa-user"></i> Nom d'utilisateur *
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="username"
+                               name="username"
+                               required
+                               placeholder="Choisissez un nom d'utilisateur">
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-bold">
+                            <i class="fas fa-envelope"></i> Email *
+                        </label>
+                        <input type="email"
+                               class="form-control"
+                               id="email"
+                               name="email"
+                               required
+                               placeholder="exemple@email.com">
+                    </div>
+
+                    <!-- Mot de passe -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label fw-bold">
+                            <i class="fas fa-lock"></i> Mot de passe *
+                        </label>
+                        <input type="password"
+                               class="form-control"
+                               id="password"
+                               name="password"
+                               required
+                               placeholder="Minimum 8 caractères">
+                        <small class="text-muted">Minimum 8 caractères</small>
+                    </div>
+
+                    <!-- Confirmation mot de passe -->
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label fw-bold">
+                            <i class="fas fa-check-circle"></i> Confirmer le mot de passe *
+                        </label>
+                        <input type="password"
+                               class="form-control"
+                               id="confirmPassword"
+                               name="confirmPassword"
+                               required
+                               placeholder="Répétez votre mot de passe">
+                    </div>
+
+                    <!-- 🔥 NOUVEAU : Choix du type de compte -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-user-tag"></i> Type de compte *
+                        </label>
+                        <p class="text-muted small">Choisissez le type de compte que vous voulez créer</p>
+
+                        <div class="row g-3">
+                            <!-- Client -->
+                            <div class="col-12 col-sm-6">
+                                <div class="role-card" onclick="selectRole('USER')" id="role-card-USER">
+                                    <i class="fas fa-user text-primary"></i>
+                                    <div class="role-title">👤 Client</div>
+                                    <div class="role-desc">Je veux acheter des produits</div>
+                                </div>
+                            </div>
+
+                            <!-- Commerçant -->
+                            <div class="col-12 col-sm-6">
+                                <div class="role-card" onclick="selectRole('COMMERCANT')" id="role-card-COMMERCANT">
+                                    <i class="fas fa-store text-success"></i>
+                                    <div class="role-title">🏪 Commerçant</div>
+                                    <div class="role-desc">Je veux vendre des produits</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Champ caché pour le rôle -->
+                        <input type="hidden" id="role" name="role" value="USER">
+                        <small class="text-muted d-block mt-2">
+                            <i class="fas fa-info-circle"></i>
+                            <span id="role-selected">Client sélectionné par défaut</span>
+                        </small>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 py-2">
+                        <i class="fas fa-user-plus"></i> S'inscrire
+                    </button>
+                </form>
+
+                <div class="text-center mt-3">
+                    <p class="text-muted">
+                        Déjà un compte ?
+                        <a href="/login" class="text-primary fw-bold">Se connecter</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function selectRole(role) {
+        // Mettre à jour le champ caché
+        document.getElementById('role').value = role;
+
+        // Mettre à jour l'affichage
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.classList.remove('active');
+        });
+        document.getElementById('role-card-' + role).classList.add('active');
+
+        // Mettre à jour le texte
+        const label = role === 'USER' ? 'Client' : 'Commerçant';
+        document.getElementById('role-selected').textContent = label + ' sélectionné';
+    }
+
+    // Sélectionner "Client" par défaut au chargement
+    document.addEventListener('DOMContentLoaded', function() {
+        selectRole('USER');
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

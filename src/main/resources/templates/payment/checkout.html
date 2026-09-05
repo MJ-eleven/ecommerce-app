@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Paiement</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        .payment-card {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .StripeElement {
+            margin: 10px 0 20px 0;
+            padding: 10px 14px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            background-color: white;
+        }
+        .StripeElement--focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+        .StripeElement--invalid {
+            border-color: #dc3545;
+        }
+        .payment-success {
+            color: #28a745;
+        }
+        .payment-error {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/"><i class="fas fa-store"></i> E-Shop</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="payment-card card">
+        <div class="card-body">
+            <h3 class="text-center mb-4">
+                <i class="fas fa-credit-card text-primary"></i> Paiement
+            </h3>
+
+            <div class="mb-3">
+                <p><strong>Commande #<span th:text="${order.id}">1</span></strong></p>
+                <p><strong>Total :</strong> <span class="text-primary h5" th:text="${order.totalAmount} + ' €'">0.00 €</span></p>
+                <p><strong>Client :</strong> <span th:text="${order.customerName}">Nom</span></p>
+            </div>
+
+            <hr>
+
+            <form id="payment-form">
+                <div id="card-element" class="StripeElement">
+                    <!-- Stripe Elements va créer le champ de carte ici -->
+                </div>
+
+                <div id="card-errors" role="alert" class="payment-error"></div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 mt-3" id="submitBtn">
+                    <i class="fas fa-lock"></i> Payer <span th:text="${order.totalAmount} + ' €'">0.00 €</span>
+                </button>
+
+                <div id="loading" style="display: none;" class="text-center mt-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                    <p>Traitement du paiement en cours...</p>
+                </div>
+            </form>
+
+            <div class="text-center mt-3">
+                <a href="/cart" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Retour au panier
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Récupérer la clé publique Stripe
+    const publicKey = /*[[${publicKey}]]*/ 'pk_test_xxx';
+    const stripe = Stripe(publicKey);
+    const elements = stripe.elements();
+
+    // Créer le champ de carte
+    const card = elements.create('card', {
+        style: {
+            base: {
+                fontSize: '16px',
+                color: '#424770',
+                '::placeholder': {
+                    color: '#aab7c4',
+                },
+            },
+            invalid: {
+                color: '#9e2146',
+            },
+        }
+    });
+
+    card.mount('#card-element');
+
+    // Gestion des erreurs de carte
+    card.on('change', function(event) {
+        const displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+
+    // Soumission du formulaire
+    const form = document.getElementById('payment-form');
+    const submitBtn = document.getElementById('submitBtn');
+    const loading = document.getElementById('loading');
+
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        // Désactiver le bouton et afficher le chargement
+        submitBtn.disabled = true;
+        submitBtn.style.display = 'none';
+        loading.style.display = 'block';
+
+        const orderId = /*[[${order.id}]]*/ 1;
+
+        try {
+            // Créer un PaymentIntent
+            const response = await fetch('/payment/create-payment-intent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    orderId: orderId
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            // Confirmer le paiement avec Stripe
+            const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
+                payment_method: {
+                    card: card,
+                    billing_details: {
+                        name: /*[[${order.customerName}]]*/ 'Client',
+                        email: /*[[${order.customerEmail}]]*/ 'client@email.com',
+                    },
+                }
+            });
+
+            if (error) {
+                // Erreur de paiement
+                document.getElementById('card-errors').textContent = error.message;
+                submitBtn.disabled = false;
+                submitBtn.style.display = 'block';
+                loading.style.display = 'none';
+            } else if (paymentIntent.status === 'succeeded') {
+                // Paiement réussi
+                window.location.href = '/payment/success?paymentIntentId=' + paymentIntent.id;
+            }
+        } catch (error) {
+            document.getElementById('card-errors').textContent = error.message;
+            submitBtn.disabled = false;
+            submitBtn.style.display = 'block';
+            loading.style.display = 'none';
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

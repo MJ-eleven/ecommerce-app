@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Mes commandes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/"><i class="fas fa-store"></i> E-Shop Commerçant</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/merchant/dashboard">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="/merchant/products">Mes produits</a></li>
+                <li class="nav-item"><a class="nav-link" href="/merchant/categories">Mes catégories</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/merchant/orders">Commandes</a></li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/logout">Déconnexion</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <h1><i class="fas fa-shopping-cart"></i> Mes commandes</h1>
+    <p class="text-muted">Toutes les commandes de vos produits</p>
+
+    <!-- Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+        <span th:text="${success}">Succès</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+        <span th:text="${error}">Erreur</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Client</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="order : ${orders}">
+                <td th:text="${order.id}">1</td>
+                <td>
+                    <strong th:text="${order.customerName}">Nom</strong><br>
+                    <small class="text-muted" th:text="${order.customerEmail}">email@exemple.com</small>
+                </td>
+                <td th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">01/01/2024</td>
+                <td th:text="${currencyService.formatPrice(order.totalAmount)}">€0</td>
+                <td>
+                    <span th:if="${order.status == 'EN ATTENTE'}" class="badge bg-warning">En attente</span>
+                    <span th:if="${order.status == 'CONFIRMÉE'}" class="badge bg-primary">Confirmée</span>
+                    <span th:if="${order.status == 'EXPÉDIÉE'}" class="badge bg-info">Expédiée</span>
+                    <span th:if="${order.status == 'LIVRÉE'}" class="badge bg-success">Livrée</span>
+                    <span th:if="${order.status == 'ANNULÉE'}" class="badge bg-danger">Annulée</span>
+                    <span th:if="${order.status == 'PAYÉE'}" class="badge bg-success">Payée</span>
+                </td>
+                <td>
+                    <!-- 🔥 BOUTON CHANGER LE STATUT -->
+                    <button type="button"
+                            class="btn btn-sm btn-primary"
+                            data-bs-toggle="modal"
+                            th:data-bs-target="'#statusModal' + ${order.id}">
+                        <i class="fas fa-edit"></i> Changer le statut
+                    </button>
+                    <a th:href="@{/merchant/orders/{id}(id=${order.id})}"
+                       class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i> Voir
+                    </a>
+                </td>
+            </tr>
+            <tr th:if="${orders.empty}">
+                <td colspan="6" class="text-center text-muted py-4">
+                    <i class="fas fa-inbox fa-2x d-block mb-2"></i>
+                    Aucune commande pour le moment
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL CHANGER LE STATUT -->
+<!-- ============================================================ -->
+<div th:each="order : ${orders}" class="modal fade" th:id="'statusModal' + ${order.id}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/merchant/orders/update-status/{id}(id=${order.id})}" method="post">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit"></i> Changer le statut
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Commande #<span th:text="${order.id}">1</span></strong></p>
+                    <p><strong>Client :</strong> <span th:text="${order.customerName}">Nom</span></p>
+                    <p><strong>Statut actuel :</strong>
+                        <span th:if="${order.status == 'EN ATTENTE'}" class="badge bg-warning">En attente</span>
+                        <span th:if="${order.status == 'CONFIRMÉE'}" class="badge bg-primary">Confirmée</span>
+                        <span th:if="${order.status == 'EXPÉDIÉE'}" class="badge bg-info">Expédiée</span>
+                        <span th:if="${order.status == 'LIVRÉE'}" class="badge bg-success">Livrée</span>
+                        <span th:if="${order.status == 'ANNULÉE'}" class="badge bg-danger">Annulée</span>
+                        <span th:if="${order.status == 'PAYÉE'}" class="badge bg-success">Payée</span>
+                    </p>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nouveau statut</label>
+                        <select class="form-select" name="status" required>
+                            <option value="EN ATTENTE" th:selected="${order.status == 'EN ATTENTE'}">En attente</option>
+                            <option value="CONFIRMÉE" th:selected="${order.status == 'CONFIRMÉE'}">Confirmée</option>
+                            <option value="EXPÉDIÉE" th:selected="${order.status == 'EXPÉDIÉE'}">Expédiée</option>
+                            <option value="LIVRÉE" th:selected="${order.status == 'LIVRÉE'}">Livrée</option>
+                            <option value="ANNULÉE" th:selected="${order.status == 'ANNULÉE'}">Annulée</option>
+                            <option value="PAYÉE" th:selected="${order.status == 'PAYÉE'}">Payée</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Mettre à jour
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

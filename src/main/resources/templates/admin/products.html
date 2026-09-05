@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Produits</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/"><i class="fas fa-store"></i> E-Shop Admin</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/admin/dashboard">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/admin/products">Produits</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/merchants">Commerçants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/orders">Commandes</a></li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/logout">Déconnexion</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <h1><i class="fas fa-box"></i> Gestion des produits</h1>
+    <p class="text-muted">Consultation de tous les produits de la plateforme</p>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>Image</th>
+                <th>Nom</th>
+                <th>Prix</th>
+                <th>Catégorie</th>
+                <th>Stock</th>
+                <th>Vendeur</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="product : ${products}">
+                <td>
+                    <img th:src="${product.imageUrl}"
+                         th:alt="${product.name}"
+                         style="width:50px; height:50px; object-fit:cover;"
+                         class="rounded"
+                         onerror="this.src='https://via.placeholder.com/50x50?text=Image'">
+                </td>
+                <td th:text="${product.name}">Nom</td>
+                <td th:text="${currencyService.formatPrice(product.price)}">€0</td>
+                <td th:text="${product.category.name}">Catégorie</td>
+                <td th:text="${product.stockQuantity}">0</td>
+                <td th:text="${product.user != null ? product.user.username : 'Inconnu'}">Vendeur</td>
+                <td>
+                    <span th:if="${product.active}" class="badge bg-success">Actif</span>
+                    <span th:unless="${product.active}" class="badge bg-danger">Inactif</span>
+                </td>
+            </tr>
+            <tr th:if="${products.empty}">
+                <td colspan="7" class="text-center text-muted py-4">
+                    <i class="fas fa-box-open fa-2x d-block mb-2"></i>
+                    Aucun produit sur la plateforme
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
