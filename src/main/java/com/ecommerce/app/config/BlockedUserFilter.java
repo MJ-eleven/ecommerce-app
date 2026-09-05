@@ -24,13 +24,21 @@ public class BlockedUserFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
+        System.out.println("🔍 BlockedUserFilter - URI: " + request.getRequestURI() + ", Method: " + request.getMethod());
+
         if (request.getRequestURI().equals("/login") && request.getMethod().equals("POST")) {
             String username = request.getParameter("username");
+            System.out.println("🔍 Tentative de connexion pour: " + username);
 
             if (username != null && !username.isEmpty()) {
                 User user = userRepository.findByUsername(username).orElse(null);
 
+                if (user != null) {
+                    System.out.println("🔍 Utilisateur trouvé: " + user.getUsername() + ", enabled: " + user.isEnabled());
+                }
+
                 if (user != null && !user.isEnabled()) {
+                    System.out.println("❌ " + username + " est BLOQUÉ - Redirection vers login?error=blocked");
                     response.sendRedirect("/login?error=blocked");
                     return;
                 }

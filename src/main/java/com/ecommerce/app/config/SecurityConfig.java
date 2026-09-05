@@ -4,6 +4,7 @@ import com.ecommerce.app.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,7 +37,6 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .addFilterBefore(blockedUserFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
@@ -80,6 +81,7 @@ public class SecurityConfig {
                                                                 HttpServletResponse response,
                                                                 AuthenticationException exception)
                                     throws IOException, ServletException {
+                                System.out.println("❌ ERREUR DE CONNEXION : " + exception.getMessage());
                                 response.sendRedirect("/login?error=true");
                             }
                         })
@@ -90,6 +92,9 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .userDetailsService(userDetailsService);
+
+        // 🔥 AJOUTER LE FILTRE APRÈS LA CONFIGURATION
+        http.addFilterBefore(blockedUserFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
