@@ -2,15 +2,14 @@ package com.ecommerce.app.controller;
 
 import com.ecommerce.app.model.User;
 import com.ecommerce.app.repository.UserRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 public class AuthController {
@@ -27,10 +26,20 @@ public class AuthController {
     public String login(
             @RequestParam(value = "error", required = false) String error,
             @RequestParam(value = "logout", required = false) String logout,
+            @RequestParam(value = "username", required = false) String username,
             Model model) {
 
-        if (error != null && error.equals("blocked")) {
-            model.addAttribute("blocked", true);
+        System.out.println("🔍 PAGE LOGIN - error: " + error + ", username: " + username);
+
+        // 🔥 VÉRIFIER LE BLOCAGE
+        if (username != null && !username.isEmpty()) {
+            User user = userRepository.findByUsername(username).orElse(null);
+            if (user != null && !user.isEnabled()) {
+                model.addAttribute("blocked", true);
+                System.out.println("🔴 " + username + " est BLOQUÉ !");
+            } else if (error != null) {
+                model.addAttribute("error", true);
+            }
         } else if (error != null) {
             model.addAttribute("error", true);
         }
@@ -40,34 +49,6 @@ public class AuthController {
         }
 
         return "auth/login";
-    }
-
-    // 🔥 API DE VÉRIFICATION DU BLOCAGE
-    @GetMapping("/api/check-blocked")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> checkBlocked(@RequestParam String username) {
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            User user = userRepository.findByUsername(username).orElse(null);
-            if (user == null) {
-                response.put("exists", false);
-                return ResponseEntity.ok(response);
-            }
-
-            response.put("exists", true);
-            response.put("blocked", !user.isEnabled());
-            response.put("username", user.getUsername());
-
-            if (!user.isEnabled()) {
-                response.put("message", "Votre compte a été bloqué par l'administrateur.");
-            }
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
-        }
     }
 
     @GetMapping("/register")
