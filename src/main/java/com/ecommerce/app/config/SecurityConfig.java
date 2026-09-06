@@ -1,10 +1,11 @@
 package com.ecommerce.app.config;
 
+import com.ecommerce.app.model.User;
+import com.ecommerce.app.repository.UserRepository;
 import com.ecommerce.app.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,7 +31,7 @@ public class SecurityConfig {
     private CustomUserDetailsService userDetailsService;
 
     @Autowired
-    private BlockedUserFilter blockedUserFilter;
+    private UserRepository userRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -63,7 +63,6 @@ public class SecurityConfig {
                                                                 HttpServletResponse response,
                                                                 Authentication authentication)
                                     throws IOException, ServletException {
-                                System.out.println("✅ CONNEXION RÉUSSIE : " + authentication.getName());
                                 if (authentication.getAuthorities().stream()
                                         .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
                                     response.sendRedirect("/admin/dashboard");
@@ -75,13 +74,26 @@ public class SecurityConfig {
                                 }
                             }
                         })
+                        // 🔥 HANDLER PERSONNALISE POUR LE BLOCAGE
                         .failureHandler(new AuthenticationFailureHandler() {
                             @Override
                             public void onAuthenticationFailure(HttpServletRequest request,
                                                                 HttpServletResponse response,
                                                                 AuthenticationException exception)
                                     throws IOException, ServletException {
-                                System.out.println("❌ ERREUR DE CONNEXION : " + exception.getMessage());
+
+                                String username = request.getParameter("username");
+                                System.out.println("🔍 Échec de connexion pour: " + username);
+
+                                if (username != null && !username.isEmpty()) {
+                                    User user = userRepository.findByUsername(username).orElse(null);
+                                    if (user != null && !user.isEnabled()) {
+                                        System.out.println("❌ " + username + " est BLOQUÉ !");
+                                        response.sendRedirect("/login?error=blocked");
+                                        return;
+                                    }
+                                }
+
                                 response.sendRedirect("/login?error=true");
                             }
                         })
@@ -92,9 +104,6 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .userDetailsService(userDetailsService);
-
-        // 🔥 AJOUTER LE FILTRE APRÈS LA CONFIGURATION
-        http.addFilterBefore(blockedUserFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
