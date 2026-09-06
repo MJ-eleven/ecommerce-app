@@ -4,6 +4,7 @@ import com.ecommerce.app.model.Favorite;
 import com.ecommerce.app.model.Product;
 import com.ecommerce.app.model.User;
 import com.ecommerce.app.repository.UserRepository;
+import com.ecommerce.app.service.CurrencyService;
 import com.ecommerce.app.service.FavoriteService;
 import com.ecommerce.app.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class FavoriteController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private CurrencyService currencyService;
 
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -68,10 +72,18 @@ public class FavoriteController {
 
     @GetMapping
     public String listFavorites(Model model) {
-        User user = getCurrentUser();
-        List<Product> favorites = favoriteService.getFavoriteProductsByUser(user);
-        model.addAttribute("favorites", favorites);
-        model.addAttribute("pageTitle", "Mes favoris - E-Shop");
-        return "favorites/list";
+        try {
+            User user = getCurrentUser();
+            List<Product> favorites = favoriteService.getFavoriteProductsByUser(user);
+
+            model.addAttribute("favorites", favorites);
+            model.addAttribute("pageTitle", "Mes favoris - E-Shop");
+            model.addAttribute("currencyService", currencyService);
+            model.addAttribute("favoriteService", favoriteService);
+            model.addAttribute("currentUrl", "/favorites");
+            return "favorites/list";
+        } catch (Exception e) {
+            return "redirect:/login";
+        }
     }
 }
