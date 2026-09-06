@@ -2,11 +2,13 @@ package com.ecommerce.app.controller;
 
 import com.ecommerce.app.model.Product;
 import com.ecommerce.app.model.ProductVariant;
-import com.ecommerce.app.service.CartService;
-import com.ecommerce.app.service.CategoryService;
-import com.ecommerce.app.service.CurrencyService;
-import com.ecommerce.app.service.ProductService;
+import com.ecommerce.app.model.Review;
+import com.ecommerce.app.model.User;
+import com.ecommerce.app.repository.UserRepository;
+import com.ecommerce.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +34,15 @@ public class ProductController {
 
     @Autowired
     private CurrencyService currencyService;
+
+    @Autowired
+    private ReviewService reviewService;
+
+    @Autowired
+    private FavoriteService favoriteService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping
     public String listProducts(
@@ -69,9 +80,34 @@ public class ProductController {
         Product product = productService.getProductById(id);
         List<ProductVariant> variants = productService.getVariantsByProduct(id);
 
+        // Récupérer l'utilisateur connecté
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = null;
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+            String username = auth.getName();
+            currentUser = userRepository.findByUsername(username).orElse(null);
+        }
+
+        // Vérifier si le produit est dans les favoris
+        boolean isFavorite = false;
+        if (currentUser != null) {
+            isFavorite = favoriteService.isFavorite(currentUser, product);
+        }
+
+        // Récupérer les avis
+        double averageRating = reviewService.getProductAverageRating(product);
+        long reviewCount = reviewService.getProductReviewCount(product);
+        List<Review> reviews = reviewService.getReviewsByProduct(product);
+        boolean hasReviewed = currentUser != null && reviewService.hasUserReviewed(product, currentUser);
+
         model.addAttribute("product", product);
         model.addAttribute("variants", variants);
         model.addAttribute("hasVariants", !variants.isEmpty());
+        model.addAttribute("isFavorite", isFavorite);
+        model.addAttribute("averageRating", averageRating);
+        model.addAttribute("reviewCount", reviewCount);
+        model.addAttribute("reviews", reviews);
+        model.addAttribute("hasReviewed", hasReviewed);
         model.addAttribute("pageTitle", product.getName() + " - E-Shop");
         model.addAttribute("cartService", cartService);
         model.addAttribute("currencyService", currencyService);
@@ -88,11 +124,9 @@ public class ProductController {
 
         try {
             if (variantId != null && variantId > 0) {
-                // Ajouter une variante
                 ProductVariant variant = productService.getVariantById(variantId);
                 cartService.addToCart(variant, quantity);
             } else {
-                // Ajouter un produit simple
                 Product product = productService.getProductById(id);
                 cartService.addToCart(product, quantity);
             }

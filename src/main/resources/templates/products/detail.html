@@ -82,6 +82,38 @@
             color: #0d6efd;
             background: #f8f9fa;
         }
+        .star-rating {
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .star-rating input {
+            display: none;
+        }
+        .star-rating label {
+            color: #ddd;
+            transition: color 0.2s;
+        }
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input:checked ~ label {
+            color: #ffc107;
+        }
+        .star-rating .stars {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 5px;
+        }
+        .favorite-btn {
+            transition: all 0.3s;
+        }
+        .favorite-btn:hover {
+            transform: scale(1.1);
+        }
+        .review-card {
+            border-left: 4px solid #ffc107;
+            background: #f8f9fa;
+        }
         @media (max-width: 576px) {
             .variant-option img {
                 width: 60px;
@@ -101,6 +133,7 @@
             <ul class="navbar-nav me-auto">
                 <li class="nav-item"><a class="nav-link" href="/">Accueil</a></li>
                 <li class="nav-item"><a class="nav-link" href="/products">Produits</a></li>
+                <li class="nav-item"><a class="nav-link" href="/favorites"><i class="fas fa-heart text-danger"></i> Favoris</a></li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
                     <a class="nav-link" href="/orders">
                         <i class="fas fa-list"></i> Mes commandes
@@ -151,6 +184,11 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> <span th:text="${success}">Succès</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
     <div class="row">
         <!-- IMAGE PRINCIPALE -->
         <div class="col-12 col-md-6 mb-4">
@@ -168,6 +206,38 @@
                 <span class="badge bg-success" th:text="'Stock: ' + ${product.stockQuantity}">Stock</span>
                 <span th:if="${hasVariants}" class="badge bg-info">Plusieurs variantes</span>
             </div>
+
+            <!-- 🔥 NOTATION -->
+            <div class="mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-bold">Note :</span>
+                    <span th:each="i : ${#numbers.sequence(1, 5)}">
+                        <i th:if="${i <= averageRating}" class="fas fa-star text-warning"></i>
+                        <i th:unless="${i <= averageRating}" class="far fa-star text-warning"></i>
+                    </span>
+                    <span class="text-muted small">(<span th:text="${reviewCount}">0</span> avis)</span>
+                </div>
+            </div>
+
+            <!-- 🔥 FAVORIS -->
+            <div class="mb-3">
+                <form th:if="${isFavorite}" th:action="@{/favorites/remove/{id}(id=${product.id})}" method="post" class="d-inline">
+                    <input type="hidden" name="redirect" th:value="${currentUrl}">
+                    <button type="submit" class="btn btn-danger favorite-btn">
+                        <i class="fas fa-heart"></i> Retirer des favoris
+                    </button>
+                </form>
+                <form th:unless="${isFavorite}" th:action="@{/favorites/add/{id}(id=${product.id})}" method="post" class="d-inline">
+                    <input type="hidden" name="redirect" th:value="${currentUrl}">
+                    <button type="submit" class="btn btn-outline-danger favorite-btn">
+                        <i class="far fa-heart"></i> Ajouter aux favoris
+                    </button>
+                </form>
+                <span class="text-muted ms-2 small">
+                    <i class="fas fa-users"></i> <span th:text="${favoriteService != null ? favoriteService.getFavoriteCountByProduct(product) : 0}">0</span> personnes l'ont en favoris
+                </span>
+            </div>
+
             <p class="lead" th:text="${product.description}">Description</p>
             <h2 id="variantPrice" class="text-primary mb-4" th:text="${currencyService.formatPrice(product.price)}">€0.00</h2>
 
@@ -240,6 +310,80 @@
                 <a href="/products" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left"></i> Retour
                 </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         SECTION AVIS
+         ============================================================ -->
+    <div class="row mt-5">
+        <div class="col-12 col-lg-8">
+
+            <!-- Formulaire d'avis -->
+            <div th:if="${#authorization.expression('isAuthenticated()') and !hasReviewed}" class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-star text-warning"></i> Donnez votre avis</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/reviews/add/{id}(id=${product.id})}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Votre note</label>
+                            <div class="star-rating">
+                                <div class="stars">
+                                    <input type="radio" id="star5" name="rating" value="5" required>
+                                    <label for="star5" title="5 étoiles">★</label>
+                                    <input type="radio" id="star4" name="rating" value="4">
+                                    <label for="star4" title="4 étoiles">★</label>
+                                    <input type="radio" id="star3" name="rating" value="3">
+                                    <label for="star3" title="3 étoiles">★</label>
+                                    <input type="radio" id="star2" name="rating" value="2">
+                                    <label for="star2" title="2 étoiles">★</label>
+                                    <input type="radio" id="star1" name="rating" value="1">
+                                    <label for="star1" title="1 étoile">★</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Votre commentaire</label>
+                            <textarea class="form-control" name="comment" rows="3" placeholder="Partagez votre expérience..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Envoyer
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div th:if="${hasReviewed}" class="alert alert-info">
+                <i class="fas fa-check-circle"></i> Vous avez déjà donné votre avis sur ce produit.
+            </div>
+
+            <div th:if="${!#authorization.expression('isAuthenticated()')}" class="alert alert-info">
+                <i class="fas fa-info-circle"></i> <a href="/login">Connectez-vous</a> pour laisser un avis.
+            </div>
+
+            <!-- Liste des avis -->
+            <h5 class="mb-3"><i class="fas fa-comments"></i> Avis des clients (<span th:text="${reviewCount}">0</span>)</h5>
+
+            <div th:each="review : ${reviews}" class="review-card card mb-2">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <strong th:text="${review.user.username}">Utilisateur</strong>
+                        <small class="text-muted" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}">Date</small>
+                    </div>
+                    <div class="mb-1">
+                        <span th:each="i : ${#numbers.sequence(1, 5)}">
+                            <i th:if="${i <= review.rating}" class="fas fa-star text-warning"></i>
+                            <i th:unless="${i <= review.rating}" class="far fa-star text-warning"></i>
+                        </span>
+                    </div>
+                    <p class="mb-0" th:text="${review.comment}">Commentaire</p>
+                </div>
+            </div>
+
+            <div th:if="${reviews.empty}" class="text-center text-muted py-3">
+                <i class="fas fa-comment-slash"></i> Aucun avis pour le moment
             </div>
         </div>
     </div>
