@@ -11,6 +11,7 @@
         .product-card {
             transition: transform 0.3s, box-shadow 0.3s;
             height: 100%;
+            position: relative;
         }
         .product-card:hover {
             transform: translateY(-5px);
@@ -35,6 +36,40 @@
             background-color: #0b5ed7;
             color: white;
         }
+
+        /* 🔥 BOUTON FAVORI SUR LA CARTE */
+        .favorite-btn-card {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .favorite-btn-card:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .favorite-btn-card .fa-heart {
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        .favorite-btn-card .fa-heart.text-danger {
+            color: #dc3545 !important;
+        }
+        .favorite-btn-card .fa-heart.text-muted {
+            color: #6c757d !important;
+        }
     </style>
 </head>
 <body>
@@ -48,10 +83,14 @@
             <ul class="navbar-nav me-auto">
                 <li class="nav-item"><a class="nav-link" href="/">Accueil</a></li>
                 <li class="nav-item"><a class="nav-link active" href="/products">Produits</a></li>
+                <li class="nav-item"><a class="nav-link" href="/about">À propos</a></li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
                     <a class="nav-link" href="/orders">
                         <i class="fas fa-list"></i> Mes commandes
                     </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" href="/favorites"><i class="fas fa-heart text-danger"></i> Favoris</a>
                 </li>
             </ul>
             <ul class="navbar-nav">
@@ -123,19 +162,50 @@
     </div>
 
     <!-- Résultats -->
-    <div class="row g-4">
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3" th:each="product : ${products}">
-            <div class="card product-card h-100">
-                <img th:src="${product.imageUrl}" class="card-img-top" th:alt="${product.name}"
-                     onerror="this.src='https://via.placeholder.com/300x200?text=Product'">
-                <div class="card-body">
-                    <h5 class="card-title" th:text="${product.name}">Nom</h5>
-                    <p class="card-text text-truncate" th:text="${product.description}">Desc</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="h5 text-primary" th:text="${currencyService.formatPrice(product.price)}">€0</span>
-                        <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-sm btn-primary">
-                            <i class="fas fa-eye"></i> Voir
-                        </a>
+    <div th:if="${products != null and !products.isEmpty()}">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="text-muted">
+                <span th:text="${products.size()}">0</span> produit(s) trouvé(s)
+            </h5>
+        </div>
+        <div class="row g-4">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3" th:each="product : ${products}">
+                <div class="card product-card">
+                    <!-- 🔥 BOUTON FAVORI SUR LA CARTE -->
+                    <form th:if="${#authorization.expression('isAuthenticated()')}"
+                          th:action="${#lists.contains(favoriteIds, product.id) ? '/favorites/remove/' + product.id : '/favorites/add/' + product.id}"
+                          method="post"
+                          class="position-absolute top-0 end-0 m-2"
+                          style="z-index: 10;">
+                        <input type="hidden" name="redirect" value="/products">
+                        <button type="submit" class="favorite-btn-card"
+                                th:title="${#lists.contains(favoriteIds, product.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}">
+                            <i th:if="${#lists.contains(favoriteIds, product.id)}"
+                               class="fas fa-heart text-danger"></i>
+                            <i th:unless="${#lists.contains(favoriteIds, product.id)}"
+                               class="far fa-heart text-muted"></i>
+                        </button>
+                    </form>
+                    <!-- 🔥 SI NON CONNECTÉ, AFFICHER UN CŒUR GRIS AVEC LIEN VERS LOGIN -->
+                    <a th:unless="${#authorization.expression('isAuthenticated())'}"
+                       href="/login"
+                       class="favorite-btn-card"
+                       title="Connectez-vous pour ajouter aux favoris"
+                       style="text-decoration: none;">
+                        <i class="far fa-heart text-muted"></i>
+                    </a>
+
+                    <img th:src="${product.imageUrl}" class="card-img-top" th:alt="${product.name}"
+                         onerror="this.src='https://via.placeholder.com/300x200?text=Product'">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${product.name}">Nom</h5>
+                        <p class="card-text text-truncate" th:text="${product.description}">Desc</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 text-primary" th:text="${currencyService.formatPrice(product.price)}">€0</span>
+                            <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye"></i> Voir
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -143,7 +213,7 @@
     </div>
 
     <!-- Message si aucun produit -->
-    <div th:if="${products.empty}" class="text-center my-5">
+    <div th:if="${products == null or products.isEmpty()}" class="text-center my-5">
         <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
         <p class="lead">Aucun produit trouvé</p>
         <a href="/products" class="btn btn-primary">Voir tous les produits</a>
