@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.1</version>
+        <version>3.4.1</version>  <!-- ✅ VERSION CORRECTE -->
         <relativePath/>
     </parent>
 
@@ -58,7 +58,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- 🔥 PostgreSQL pour Railway -->
+        <!-- PostgreSQL -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -96,14 +96,14 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- 🔥 .env -->
+        <!-- .env -->
         <dependency>
             <groupId>me.paulschwarz</groupId>
             <artifactId>spring-dotenv</artifactId>
             <version>4.0.0</version>
         </dependency>
 
-        <!-- Stripe - Paiement en ligne -->
+        <!-- Stripe -->
         <dependency>
             <groupId>com.stripe</groupId>
             <artifactId>stripe-java</artifactId>
