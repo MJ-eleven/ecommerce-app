@@ -1,20 +1,32 @@
 package com.ecommerce.app.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Locale;
 
 @Service
-// 🔥 SUPPRIMER @SessionScope pour éviter l'erreur de session
 public class CurrencyService {
 
     private static final double EUR_TO_USD = 1.08;
     private static final double EUR_TO_XOF = 655.96;
 
-    private String currentCurrency = "EUR";
+    @Value("${currency.default:XOF}")
+    private String defaultCurrency;
+
+    private String currentCurrency;
+
+    @PostConstruct
+    public void init() {
+        this.currentCurrency = defaultCurrency;
+        System.out.println("========================================");
+        System.out.println("💰 DEVISE PAR DÉFAUT : " + currentCurrency);
+        System.out.println("========================================");
+    }
 
     public enum Currency {
         EUR("€", "Euro", "EUR"),
@@ -39,6 +51,7 @@ public class CurrencyService {
     public void setCurrency(String currency) {
         if (currency.equals("EUR") || currency.equals("USD") || currency.equals("XOF")) {
             this.currentCurrency = currency;
+            System.out.println("💰 Devise changée : " + currentCurrency);
         }
     }
 
@@ -52,7 +65,7 @@ public class CurrencyService {
                 return c;
             }
         }
-        return Currency.EUR;
+        return Currency.XOF;
     }
 
     public BigDecimal convert(BigDecimal amountInEuro) {
