@@ -17,10 +17,11 @@
         }
         .StripeElement {
             margin: 10px 0 20px 0;
-            padding: 10px 14px;
+            padding: 12px 14px;
             border: 1px solid #ced4da;
             border-radius: 8px;
             background-color: white;
+            transition: all 0.3s;
         }
         .StripeElement--focus {
             border-color: #80bdff;
@@ -29,11 +30,15 @@
         .StripeElement--invalid {
             border-color: #dc3545;
         }
-        .payment-success {
-            color: #28a745;
-        }
         .payment-error {
             color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -60,8 +65,11 @@
             <hr>
 
             <form id="payment-form">
-                <div id="card-element" class="StripeElement">
-                    <!-- Stripe Elements va créer le champ de carte ici -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Informations de carte bancaire</label>
+                    <div id="card-element" class="StripeElement">
+                        <!-- Stripe Elements va créer le champ de carte ici -->
+                    </div>
                 </div>
 
                 <div id="card-errors" role="alert" class="payment-error"></div>
@@ -70,7 +78,7 @@
                     <i class="fas fa-lock"></i> Payer <span th:text="${order.totalAmount} + ' €'">0.00 €</span>
                 </button>
 
-                <div id="loading" style="display: none;" class="text-center mt-3">
+                <div class="loading-spinner" id="loading">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Chargement...</span>
                     </div>
@@ -88,8 +96,14 @@
 </div>
 
 <script>
-    // Récupérer la clé publique Stripe
+    // 🔥 Récupérer la clé publique Stripe
     const publicKey = /*[[${publicKey}]]*/ 'pk_test_xxx';
+    console.log('🔑 Clé publique Stripe:', publicKey);
+
+    if (publicKey === 'pk_test_xxx' || publicKey === '' || publicKey === null) {
+        console.error('❌ Clé publique Stripe manquante !');
+    }
+
     const stripe = Stripe(publicKey);
     const elements = stripe.elements();
 
@@ -125,19 +139,18 @@
     const form = document.getElementById('payment-form');
     const submitBtn = document.getElementById('submitBtn');
     const loading = document.getElementById('loading');
+    const orderId = /*[[${order.id}]]*/ 1;
 
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
 
-        // Désactiver le bouton et afficher le chargement
         submitBtn.disabled = true;
         submitBtn.style.display = 'none';
         loading.style.display = 'block';
 
-        const orderId = /*[[${order.id}]]*/ 1;
-
         try {
-            // Créer un PaymentIntent
+            console.log('🔄 Création du PaymentIntent pour la commande #' + orderId);
+
             const response = await fetch('/payment/create-payment-intent', {
                 method: 'POST',
                 headers: {
@@ -149,12 +162,12 @@
             });
 
             const data = await response.json();
+            console.log('📦 Réponse du serveur:', data);
 
             if (data.error) {
                 throw new Error(data.error);
             }
 
-            // Confirmer le paiement avec Stripe
             const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
                 payment_method: {
                     card: card,
@@ -166,16 +179,17 @@
             });
 
             if (error) {
-                // Erreur de paiement
+                console.error('❌ Erreur de paiement:', error);
                 document.getElementById('card-errors').textContent = error.message;
                 submitBtn.disabled = false;
                 submitBtn.style.display = 'block';
                 loading.style.display = 'none';
             } else if (paymentIntent.status === 'succeeded') {
-                // Paiement réussi
+                console.log('✅ Paiement réussi!');
                 window.location.href = '/payment/success?paymentIntentId=' + paymentIntent.id;
             }
         } catch (error) {
+            console.error('❌ Erreur:', error);
             document.getElementById('card-errors').textContent = error.message;
             submitBtn.disabled = false;
             submitBtn.style.display = 'block';

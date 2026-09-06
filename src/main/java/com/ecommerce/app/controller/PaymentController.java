@@ -13,7 +13,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -28,47 +27,52 @@ public class PaymentController {
 
     @GetMapping("/checkout/{orderId}")
     public String paymentPage(@PathVariable Long orderId, Model model) {
-        Order order = orderService.getOrderById(orderId);
-        model.addAttribute("order", order);
-        model.addAttribute("publicKey", stripeService.getPublicKey());
-        model.addAttribute("pageTitle", "Paiement - E-Shop");
-        return "payment/checkout";
+        try {
+            Order order = orderService.getOrderById(orderId);
+            String publicKey = stripeService.getPublicKey();
+
+            System.out.println("🔑 Clé publique envoyée à la vue: " + publicKey);
+
+            model.addAttribute("order", order);
+            model.addAttribute("publicKey", publicKey);
+            model.addAttribute("pageTitle", "Paiement - E-Shop");
+            return "payment/checkout";
+        } catch (Exception e) {
+            System.out.println("❌ Erreur: " + e.getMessage());
+            return "redirect:/orders";
+        }
     }
 
     @PostMapping("/create-payment-intent")
     @ResponseBody
     public ResponseEntity<Map<String, String>> createPaymentIntent(@RequestBody Map<String, Object> payload) {
+        Map<String, String> response = new HashMap<>();
         try {
             Long orderId = Long.valueOf(payload.get("orderId").toString());
             Order order = orderService.getOrderById(orderId);
 
             PaymentIntent paymentIntent = stripeService.createPaymentIntent(order);
 
-            Map<String, String> response = new HashMap<>();
             response.put("clientSecret", paymentIntent.getClientSecret());
             response.put("paymentIntentId", paymentIntent.getId());
 
             return ResponseEntity.ok(response);
-        } catch (StripeException e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
-    }
 
-    @PostMapping("/webhook")
-    @ResponseBody
-    public String handleWebhook(@RequestBody String payload) {
-        // Gérer les événements Stripe (paiement réussi, échoué, etc.)
-        System.out.println("Webhook reçu: " + payload);
-        return "OK";
+        } catch (StripeException e) {
+            System.out.println("❌ Erreur Stripe: " + e.getMessage());
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        } catch (Exception e) {
+            System.out.println("❌ Erreur: " + e.getMessage());
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     @GetMapping("/success")
     public String paymentSuccess(@RequestParam String paymentIntentId, Model model) {
-        // Récupérer la commande à partir du paymentIntentId
-        // Mettre à jour le statut de la commande
         model.addAttribute("pageTitle", "Paiement réussi - E-Shop");
+        model.addAttribute("paymentIntentId", paymentIntentId);
         return "payment/success";
     }
 

@@ -13,6 +13,12 @@ public class StripeConfig {
 
     @PostConstruct
     public void init() {
+        if (secretKey == null || secretKey.isEmpty()) {
+            System.err.println("❌ STRIPE SECRET KEY MANQUANTE !");
+            return;
+        }
         Stripe.apiKey = secretKey;
+        System.out.println("✅ Stripe configuré avec succès !");
+        System.out.println("🔑 Clé secrète: " + secretKey.substring(0, 15) + "...");
     }
 }
