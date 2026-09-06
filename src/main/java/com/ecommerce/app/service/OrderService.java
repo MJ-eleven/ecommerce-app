@@ -30,6 +30,9 @@ public class OrderService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     // ============================================================
     // CRÉATION DE COMMANDE
     // ============================================================
@@ -88,6 +91,10 @@ public class OrderService {
             Order savedOrder = orderRepository.save(order);
             createdOrders.add(savedOrder);
 
+            // 🔥 ENVOYER UNE NOTIFICATION AU COMMERÇANT
+            notificationService.createNewOrderNotification(merchant, savedOrder);
+            System.out.println("📧 Notification envoyée au commerçant: " + merchant.getUsername() + " - Commande #" + savedOrder.getId());
+
             if (parentOrder == null) {
                 parentOrder = savedOrder;
             } else {
@@ -141,10 +148,25 @@ public class OrderService {
     // ============================================================
     // MISE À JOUR
     // ============================================================
+    @Transactional
     public Order updateOrderStatus(Long id, String status) {
         Order order = getOrderById(id);
         order.setStatus(status);
-        return orderRepository.save(order);
+        Order updatedOrder = orderRepository.save(order);
+
+        // 🔥 NOTIFIER LE COMMERÇANT DU CHANGEMENT DE STATUT
+        if (updatedOrder.getMerchant() != null) {
+            String message = "📦 La commande #" + updatedOrder.getId() + " est maintenant " + status;
+            notificationService.createNotification(
+                    updatedOrder.getMerchant(),
+                    updatedOrder,
+                    message,
+                    "ORDER_STATUS_CHANGED"
+            );
+            System.out.println("📧 Notification de changement de statut envoyée au commerçant");
+        }
+
+        return updatedOrder;
     }
 
     // ============================================================

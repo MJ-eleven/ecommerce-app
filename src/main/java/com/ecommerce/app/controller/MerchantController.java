@@ -1,18 +1,8 @@
 package com.ecommerce.app.controller;
 
-import com.ecommerce.app.model.Category;
-import com.ecommerce.app.model.Order;
-import com.ecommerce.app.model.Product;
-import com.ecommerce.app.model.ProductVariant;
-import com.ecommerce.app.model.User;
-import com.ecommerce.app.repository.CategoryRepository;
-import com.ecommerce.app.repository.OrderRepository;
-import com.ecommerce.app.repository.ProductRepository;
-import com.ecommerce.app.repository.ProductVariantRepository;
-import com.ecommerce.app.repository.UserRepository;
-import com.ecommerce.app.service.CategoryService;
-import com.ecommerce.app.service.CurrencyService;
-import com.ecommerce.app.service.OrderService;
+import com.ecommerce.app.model.*;
+import com.ecommerce.app.repository.*;
+import com.ecommerce.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -50,6 +40,9 @@ public class MerchantController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
@@ -69,7 +62,10 @@ public class MerchantController {
         double totalRevenue = orderService.getTotalRevenueByMerchant(currentUser.getId());
         long pendingOrders = orderService.countPendingOrdersByMerchant(currentUser.getId());
 
-        // 🔥 Convertir le chiffre d'affaires dans la devise actuelle
+        // 🔥 RÉCUPÉRER LE NOMBRE DE NOTIFICATIONS NON LUES
+        long unreadCount = notificationService.getUnreadCount(currentUser);
+
+        // Convertir le chiffre d'affaires dans la devise actuelle
         BigDecimal convertedRevenue = currencyService.convert(BigDecimal.valueOf(totalRevenue));
 
         // Données pour les graphiques
@@ -81,7 +77,6 @@ public class MerchantController {
             salesValues.add((Double) row[1]);
         }
 
-        // S'assurer qu'il y a 7 jours
         while (salesLabels.size() < 7) {
             salesLabels.add(0, "J-" + (7 - salesLabels.size()));
             salesValues.add(0, 0.0);
@@ -116,6 +111,7 @@ public class MerchantController {
         model.addAttribute("totalRevenue", totalRevenue);
         model.addAttribute("convertedRevenue", convertedRevenue);
         model.addAttribute("pendingOrders", pendingOrders);
+        model.addAttribute("unreadCount", unreadCount);  // 🔥 AJOUTÉ
 
         model.addAttribute("salesLabels", salesLabels);
         model.addAttribute("salesData", salesValues);
@@ -551,5 +547,45 @@ public class MerchantController {
             redirectAttributes.addFlashAttribute("error", "❌ Erreur : " + e.getMessage());
         }
         return "redirect:/merchant/orders";
+    }
+
+    // ============================================================
+    // 🔥 NOTIFICATIONS
+    // ============================================================
+    @GetMapping("/notifications")
+    public String getNotifications(Model model) {
+        User currentUser = getCurrentUser();
+        List<Notification> notifications = notificationService.getAllNotifications(currentUser);
+        long unreadCount = notificationService.getUnreadCount(currentUser);
+
+        model.addAttribute("notifications", notifications);
+        model.addAttribute("unreadCount", unreadCount);
+        model.addAttribute("pageTitle", "Notifications - E-Shop");
+        model.addAttribute("currencyService", currencyService);
+        model.addAttribute("currentUrl", "/merchant/notifications");
+        return "merchant/notifications";
+    }
+
+    @PostMapping("/notifications/mark-all-read")
+    public String markAllNotificationsRead(RedirectAttributes redirectAttributes) {
+        try {
+            User currentUser = getCurrentUser();
+            notificationService.markAllAsRead(currentUser);
+            redirectAttributes.addFlashAttribute("success", "✅ Toutes les notifications ont été marquées comme lues");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "❌ Erreur: " + e.getMessage());
+        }
+        return "redirect:/merchant/notifications";
+    }
+
+    @PostMapping("/notifications/mark-read/{id}")
+    public String markNotificationRead(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            User currentUser = getCurrentUser();
+            notificationService.markAsRead(id, currentUser);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "❌ Erreur: " + e.getMessage());
+        }
+        return "redirect:/merchant/notifications";
     }
 }

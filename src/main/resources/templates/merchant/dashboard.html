@@ -7,7 +7,6 @@
     <title th:text="${pageTitle}">Dashboard Commerçant</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .stat-card {
@@ -43,6 +42,13 @@
             background-color: #0d6efd;
             color: white;
         }
+        .notification-badge {
+            position: relative;
+            top: -8px;
+            right: -5px;
+            font-size: 0.65rem;
+            padding: 0.25rem 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -58,9 +64,17 @@
                 <li class="nav-item"><a class="nav-link" href="/merchant/products">Mes produits</a></li>
                 <li class="nav-item"><a class="nav-link" href="/merchant/categories">Mes catégories</a></li>
                 <li class="nav-item"><a class="nav-link" href="/merchant/orders">Commandes</a></li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/merchant/notifications">
+                        <i class="fas fa-bell"></i>
+                        Notifications
+                        <span th:if="${unreadCount > 0}"
+                              class="badge bg-danger notification-badge"
+                              th:text="${unreadCount}">0</span>
+                    </a>
+                </li>
             </ul>
             <ul class="navbar-nav">
-                <!-- Sélecteur de devise -->
                 <li class="nav-item dropdown currency-dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="currencyDropdown" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
@@ -152,7 +166,6 @@
             </div>
         </div>
 
-        <!-- 🔥 CARTE CHIFFRE D'AFFAIRES - ICÔNE DYNAMIQUE -->
         <div class="col-12 col-sm-6 col-lg-3">
             <div class="card text-white bg-warning stat-card h-100">
                 <div class="card-body">
@@ -161,7 +174,6 @@
                             <h6 class="text-white-50">Chiffre d'affaires</h6>
                             <h2 class="mb-0" th:text="${convertedRevenue}">0</h2>
                         </div>
-                        <!-- 🔥 ICÔNES SELON LA DEVISE -->
                         <i th:if="${currencyService.currentCurrency == 'EUR'}" class="fas fa-euro-sign icon"></i>
                         <i th:if="${currencyService.currentCurrency == 'USD'}" class="fas fa-dollar-sign icon"></i>
                         <span th:if="${currencyService.currentCurrency == 'XOF'}" class="icon" style="font-weight:700; font-size:2rem;">CFA</span>
@@ -252,12 +264,12 @@
                     <td th:text="${product.category.name}">Catégorie</td>
                     <td th:text="${product.stockQuantity}">0</td>
                     <td>
-                                <span th:if="${product.hasVariants()}" class="badge bg-info">
-                                    <span th:text="${product.variants.size()}">0</span> variante(s)
-                                </span>
+                        <span th:if="${product.hasVariants()}" class="badge bg-info">
+                            <span th:text="${product.variants.size()}">0</span> variante(s)
+                        </span>
                         <span th:unless="${product.hasVariants()}" class="badge bg-secondary">
-                                    Aucune
-                                </span>
+                            Aucune
+                        </span>
                     </td>
                     <td>
                         <a th:href="@{/merchant/products/edit/{id}(id=${product.id})}"
