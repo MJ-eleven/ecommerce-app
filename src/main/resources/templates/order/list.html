@@ -20,6 +20,7 @@
                 <li class="nav-item"><a class="nav-link" href="/">Accueil</a></li>
                 <li class="nav-item"><a class="nav-link" href="/products">Produits</a></li>
                 <li class="nav-item"><a class="nav-link active" href="/orders">Mes commandes</a></li>
+                <li class="nav-item"><a class="nav-link" href="/favorites"><i class="fas fa-heart text-danger"></i> Favoris</a></li>
             </ul>
             <ul class="navbar-nav">
                 <li class="nav-item">
@@ -74,13 +75,16 @@
             <tr th:each="order : ${orders}">
                 <td th:text="${order.id}">1</td>
                 <td th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">01/01/2024</td>
-                <td th:text="${currencyService.formatPrice(order.totalAmount)}">€0</td>
+                <td th:text="${currencyService.formatPrice(order.totalAmount)}">CFA 0</td>
                 <td>
                     <span th:if="${order.status == 'EN ATTENTE'}" class="badge bg-warning">En attente</span>
                     <span th:if="${order.status == 'CONFIRMÉE'}" class="badge bg-primary">Confirmée</span>
                     <span th:if="${order.status == 'EXPÉDIÉE'}" class="badge bg-info">Expédiée</span>
                     <span th:if="${order.status == 'LIVRÉE'}" class="badge bg-success">Livrée</span>
                     <span th:if="${order.status == 'ANNULÉE'}" class="badge bg-danger">Annulée</span>
+                    <span th:if="${order.status == 'PAYÉE'}" class="badge bg-success">Payée</span>
+                    <span th:if="${order.status == 'PARTIEL'}" class="badge bg-warning">Partiel</span>
+                    <span th:if="${order.status == null or order.status == ''}" class="badge bg-secondary">En attente</span>
                 </td>
                 <td>
                     <a th:href="@{/orders/{id}(id=${order.id})}" class="btn btn-sm btn-primary">

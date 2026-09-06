@@ -20,8 +20,15 @@
                 <li class="nav-item"><a class="nav-link" href="/">Accueil</a></li>
                 <li class="nav-item"><a class="nav-link" href="/products">Produits</a></li>
                 <li class="nav-item"><a class="nav-link" href="/orders">Mes commandes</a></li>
+                <li class="nav-item"><a class="nav-link" href="/favorites"><i class="fas fa-heart text-danger"></i> Favoris</a></li>
             </ul>
             <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/cart" th:href="@{/cart}">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="badge bg-danger" th:text="${cartService != null ? cartService.totalItems : 0}">0</span>
+                    </a>
+                </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="currencyDropdown" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
@@ -47,9 +54,19 @@
         <div class="col-12 col-lg-8 mx-auto">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-receipt"></i> Commande #<span th:text="${order.id}">1</span>
-                    </h4>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-receipt"></i> Commande #<span th:text="${order.id}">1</span>
+                        </h4>
+                        <span th:if="${order.status == 'EN ATTENTE'}" class="badge bg-warning">En attente</span>
+                        <span th:if="${order.status == 'CONFIRMÉE'}" class="badge bg-primary">Confirmée</span>
+                        <span th:if="${order.status == 'EXPÉDIÉE'}" class="badge bg-info">Expédiée</span>
+                        <span th:if="${order.status == 'LIVRÉE'}" class="badge bg-success">Livrée</span>
+                        <span th:if="${order.status == 'ANNULÉE'}" class="badge bg-danger">Annulée</span>
+                        <span th:if="${order.status == 'PAYÉE'}" class="badge bg-success">Payée</span>
+                        <span th:if="${order.status == 'PARTIEL'}" class="badge bg-warning">Partiel</span>
+                        <span th:if="${order.status == null or order.status == ''}" class="badge bg-secondary">En attente</span>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="row mb-4">
@@ -63,17 +80,51 @@
                             <h6><i class="fas fa-truck"></i> Livraison</h6>
                             <p class="mb-1"><strong>Adresse :</strong> <span th:text="${order.shippingAddress}">Adresse</span></p>
                             <p class="mb-1"><strong>Date :</strong> <span th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">Date</span></p>
-                            <p class="mb-1">
-                                <strong>Statut :</strong>
+                            <p class="mb-1"><strong>Statut global :</strong>
                                 <span th:if="${order.status == 'EN ATTENTE'}" class="badge bg-warning">En attente</span>
                                 <span th:if="${order.status == 'CONFIRMÉE'}" class="badge bg-primary">Confirmée</span>
                                 <span th:if="${order.status == 'EXPÉDIÉE'}" class="badge bg-info">Expédiée</span>
                                 <span th:if="${order.status == 'LIVRÉE'}" class="badge bg-success">Livrée</span>
                                 <span th:if="${order.status == 'ANNULÉE'}" class="badge bg-danger">Annulée</span>
+                                <span th:if="${order.status == 'PAYÉE'}" class="badge bg-success">Payée</span>
+                                <span th:if="${order.status == 'PARTIEL'}" class="badge bg-warning">Partiel</span>
+                                <span th:if="${order.status == null or order.status == ''}" class="badge bg-secondary">En attente</span>
                             </p>
                         </div>
                     </div>
 
+                    <!-- 🔥 SOUS-COMMANDES (PAR VENDEUR) -->
+                    <div th:if="${subOrders != null and !subOrders.isEmpty()}">
+                        <h6><i class="fas fa-store"></i> Détail par vendeur</h6>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Vendeur</th>
+                                    <th>Total</th>
+                                    <th>Statut</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="subOrder : ${subOrders}">
+                                    <td th:text="${subOrder.merchant != null ? subOrder.merchant.username : 'Inconnu'}">Vendeur</td>
+                                    <td th:text="${currencyService.formatPrice(subOrder.totalAmount)}">CFA 0</td>
+                                    <td>
+                                        <span th:if="${subOrder.status == 'EN ATTENTE'}" class="badge bg-warning">En attente</span>
+                                        <span th:if="${subOrder.status == 'CONFIRMÉE'}" class="badge bg-primary">Confirmée</span>
+                                        <span th:if="${subOrder.status == 'EXPÉDIÉE'}" class="badge bg-info">Expédiée</span>
+                                        <span th:if="${subOrder.status == 'LIVRÉE'}" class="badge bg-success">Livrée</span>
+                                        <span th:if="${subOrder.status == 'ANNULÉE'}" class="badge bg-danger">Annulée</span>
+                                        <span th:if="${subOrder.status == 'PAYÉE'}" class="badge bg-success">Payée</span>
+                                        <span th:if="${subOrder.status == null or subOrder.status == ''}" class="badge bg-secondary">En attente</span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Articles -->
                     <h6><i class="fas fa-box"></i> Articles</h6>
                     <div class="table-responsive">
                         <table class="table table-hover">
@@ -89,14 +140,14 @@
                             <tr th:each="item : ${order.items}">
                                 <td th:text="${item.product.name}">Produit</td>
                                 <td th:text="${item.quantity}">1</td>
-                                <td class="text-end" th:text="${currencyService.formatPrice(item.price)}">€0</td>
-                                <td class="text-end" th:text="${currencyService.formatPrice(item.price * item.quantity)}">€0</td>
+                                <td class="text-end" th:text="${currencyService.formatPrice(item.price)}">CFA 0</td>
+                                <td class="text-end" th:text="${currencyService.formatPrice(item.price * item.quantity)}">CFA 0</td>
                             </tr>
                             </tbody>
                             <tfoot>
                             <tr class="fw-bold">
                                 <td colspan="3" class="text-end">Total</td>
-                                <td class="text-end text-primary" th:text="${currencyService.formatPrice(order.totalAmount)}">€0</td>
+                                <td class="text-end text-primary" th:text="${currencyService.formatPrice(order.totalAmount)}">CFA 0</td>
                             </tr>
                             </tfoot>
                         </table>

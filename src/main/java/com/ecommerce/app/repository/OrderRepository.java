@@ -105,7 +105,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Object[]> findGlobalTopSellingProducts();
 
     // ============================================================
-    // 🔥 TOP 5 PRODUITS LES PLUS VENDUS
+    // TOP 5 PRODUITS LES PLUS VENDUS
     // ============================================================
     @Query("SELECT p.id, p.name, p.imageUrl, p.price, SUM(i.quantity) as totalVendu " +
             "FROM Order o " +
@@ -115,4 +115,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "GROUP BY p.id, p.name, p.imageUrl, p.price " +
             "ORDER BY totalVendu DESC")
     List<Object[]> findTop5BestSellers();
+
+    // ============================================================
+    // 🔥 COMMANDES AVEC STATUT NULL
+    // ============================================================
+    @Query("SELECT o FROM Order o WHERE o.status IS NULL OR o.status = ''")
+    List<Order> findOrdersWithNullStatus();
 }

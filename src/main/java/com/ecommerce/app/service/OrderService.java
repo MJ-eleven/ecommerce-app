@@ -91,9 +91,8 @@ public class OrderService {
             Order savedOrder = orderRepository.save(order);
             createdOrders.add(savedOrder);
 
-            // 🔥 ENVOYER UNE NOTIFICATION AU COMMERÇANT
+            // Envoyer une notification au commerçant
             notificationService.createNewOrderNotification(merchant, savedOrder);
-            System.out.println("📧 Notification envoyée au commerçant: " + merchant.getUsername() + " - Commande #" + savedOrder.getId());
 
             if (parentOrder == null) {
                 parentOrder = savedOrder;
@@ -146,15 +145,26 @@ public class OrderService {
     }
 
     // ============================================================
-    // MISE À JOUR
+    // 🔥 MISE À JOUR DU STATUT - SYNCHRONISÉ
     // ============================================================
     @Transactional
     public Order updateOrderStatus(Long id, String status) {
         Order order = getOrderById(id);
+        String oldStatus = order.getStatus();
         order.setStatus(status);
         Order updatedOrder = orderRepository.save(order);
 
-        // 🔥 NOTIFIER LE COMMERÇANT DU CHANGEMENT DE STATUT
+        // 🔥 SI CETTE COMMANDE A UN PARENT (SOUS-COMMANDE), METTRE À JOUR LE PARENT
+        if (updatedOrder.getParentOrderId() != null) {
+            updateParentOrderStatus(updatedOrder.getParentOrderId());
+        }
+
+        // 🔥 SI CETTE COMMANDE EST UN PARENT, METTRE À JOUR TOUTES LES SOUS-COMMANDES
+        if (updatedOrder.getParentOrderId() == null) {
+            updateSubOrdersStatus(updatedOrder.getId(), status);
+        }
+
+        // Notifier le commerçant
         if (updatedOrder.getMerchant() != null) {
             String message = "📦 La commande #" + updatedOrder.getId() + " est maintenant " + status;
             notificationService.createNotification(
@@ -163,10 +173,61 @@ public class OrderService {
                     message,
                     "ORDER_STATUS_CHANGED"
             );
-            System.out.println("📧 Notification de changement de statut envoyée au commerçant");
         }
 
+        // 🔥 NOTIFIER LE CLIENT DU CHANGEMENT DE STATUT
+        if (updatedOrder.getUser() != null) {
+            String message = "📦 La commande #" + updatedOrder.getId() + " est maintenant " + status;
+            notificationService.createNotification(
+                    updatedOrder.getUser(),
+                    updatedOrder,
+                    message,
+                    "ORDER_STATUS_CHANGED"
+            );
+        }
+
+        System.out.println("📧 Statut de la commande #" + id + " changé de " + oldStatus + " à " + status);
         return updatedOrder;
+    }
+
+    // 🔥 Mettre à jour le statut de la commande parente en fonction des sous-commandes
+    private void updateParentOrderStatus(Long parentOrderId) {
+        List<Order> subOrders = orderRepository.findSubOrders(parentOrderId);
+        Order parentOrder = getOrderById(parentOrderId);
+
+        if (subOrders.isEmpty()) {
+            return;
+        }
+
+        // Vérifier si toutes les sous-commandes ont le même statut
+        String firstStatus = subOrders.get(0).getStatus();
+        boolean allSame = subOrders.stream().allMatch(o -> o.getStatus().equals(firstStatus));
+
+        if (allSame) {
+            parentOrder.setStatus(firstStatus);
+            orderRepository.save(parentOrder);
+            System.out.println("📌 Statut du parent #" + parentOrderId + " mis à jour : " + firstStatus);
+        } else {
+            // Si les statuts sont différents, le parent reste "EN ATTENTE" ou "PARTIEL"
+            boolean hasPending = subOrders.stream().anyMatch(o -> o.getStatus().equals("EN ATTENTE"));
+            if (hasPending) {
+                parentOrder.setStatus("EN ATTENTE");
+            } else {
+                parentOrder.setStatus("PARTIEL");
+            }
+            orderRepository.save(parentOrder);
+            System.out.println("📌 Statut du parent #" + parentOrderId + " mis à jour : PARTIEL");
+        }
+    }
+
+    // 🔥 Mettre à jour toutes les sous-commandes quand le parent est modifié
+    private void updateSubOrdersStatus(Long parentOrderId, String status) {
+        List<Order> subOrders = orderRepository.findSubOrders(parentOrderId);
+        for (Order subOrder : subOrders) {
+            subOrder.setStatus(status);
+            orderRepository.save(subOrder);
+            System.out.println("📌 Sous-commande #" + subOrder.getId() + " mise à jour : " + status);
+        }
     }
 
     // ============================================================
