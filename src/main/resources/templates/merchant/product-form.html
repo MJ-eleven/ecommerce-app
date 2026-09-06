@@ -6,6 +6,15 @@
     <title th:text="${pageTitle}">Formulaire produit</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .form-label {
+            font-weight: 600;
+        }
+        .input-group-text {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -31,7 +40,7 @@
 <div class="container my-4">
     <div class="row">
         <div class="col-12 col-lg-8 mx-auto">
-            <div class="card">
+            <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">
                         <span th:if="${product.id == null}">
@@ -50,11 +59,11 @@
                         <input type="hidden" name="id" th:value="${product.id}">
 
                         <div class="mb-3">
-                            <label for="name" class="form-label fw-bold">
-                                <i class="fas fa-tag"></i> Nom du produit *
+                            <label for="name" class="form-label">
+                                <i class="fas fa-tag text-primary"></i> Nom du produit *
                             </label>
                             <input type="text"
-                                   class="form-control"
+                                   class="form-control form-control-lg"
                                    id="name"
                                    name="name"
                                    th:field="*{name}"
@@ -63,8 +72,8 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="description" class="form-label fw-bold">
-                                <i class="fas fa-align-left"></i> Description
+                            <label for="description" class="form-label">
+                                <i class="fas fa-align-left text-primary"></i> Description
                             </label>
                             <textarea class="form-control"
                                       id="description"
@@ -77,13 +86,13 @@
                         <div class="row">
                             <div class="col-12 col-md-6">
                                 <div class="mb-3">
-                                    <label for="price" class="form-label fw-bold">
-                                        <i class="fas fa-money-bill-wave"></i> Prix (FCFA) *
+                                    <label for="price" class="form-label">
+                                        <i class="fas fa-money-bill-wave text-primary"></i> Prix (FCFA) *
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text">CFA</span>
                                         <input type="number"
-                                               class="form-control"
+                                               class="form-control form-control-lg"
                                                id="price"
                                                name="price"
                                                th:field="*{price}"
@@ -98,11 +107,11 @@
 
                             <div class="col-12 col-md-6">
                                 <div class="mb-3">
-                                    <label for="stockQuantity" class="form-label fw-bold">
-                                        <i class="fas fa-boxes"></i> Stock *
+                                    <label for="stockQuantity" class="form-label">
+                                        <i class="fas fa-boxes text-primary"></i> Stock *
                                     </label>
                                     <input type="number"
-                                           class="form-control"
+                                           class="form-control form-control-lg"
                                            id="stockQuantity"
                                            name="stockQuantity"
                                            th:field="*{stockQuantity}"
@@ -113,10 +122,10 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="categoryId" class="form-label fw-bold">
-                                <i class="fas fa-tags"></i> Catégorie *
+                            <label for="categoryId" class="form-label">
+                                <i class="fas fa-tags text-primary"></i> Catégorie *
                             </label>
-                            <select class="form-select"
+                            <select class="form-select form-select-lg"
                                     id="categoryId"
                                     name="categoryId"
                                     required>
@@ -130,8 +139,8 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="imageUrl" class="form-label fw-bold">
-                                <i class="fas fa-image"></i> URL de l'image
+                            <label for="imageUrl" class="form-label">
+                                <i class="fas fa-image text-primary"></i> URL de l'image
                             </label>
                             <input type="url"
                                    class="form-control"
@@ -145,21 +154,24 @@
                             </small>
                         </div>
 
+                        <!-- Aperçu de l'image -->
                         <div class="mb-3" th:if="${product.imageUrl}">
-                            <label class="form-label fw-bold">Aperçu :</label>
+                            <label class="form-label">Aperçu :</label>
                             <br>
                             <img th:src="${product.imageUrl}"
                                  th:alt="${product.name}"
                                  style="max-height:150px; max-width:100%;"
-                                 class="rounded"
+                                 class="rounded border"
                                  onerror="this.src='https://via.placeholder.com/150x150?text=Image+non+trouvee'">
                         </div>
 
+                        <hr>
+
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success">
+                            <button type="submit" class="btn btn-success btn-lg">
                                 <i class="fas fa-save"></i> Enregistrer
                             </button>
-                            <a href="/merchant/products" class="btn btn-secondary">
+                            <a href="/merchant/products" class="btn btn-secondary btn-lg">
                                 <i class="fas fa-arrow-left"></i> Retour
                             </a>
                         </div>

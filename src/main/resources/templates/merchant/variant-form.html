@@ -6,108 +6,160 @@
     <title th:text="${pageTitle}">Formulaire variante</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .form-label {
+            font-weight: 600;
+        }
+        .input-group-text {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
         <a class="navbar-brand" href="/"><i class="fas fa-store"></i> E-Shop Commerçant</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/merchant/dashboard">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="/merchant/products">Mes produits</a></li>
+                <li class="nav-item"><a class="nav-link" href="/merchant/categories">Mes catégories</a></li>
+                <li class="nav-item"><a class="nav-link" href="/merchant/orders">Commandes</a></li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/logout">Déconnexion</a></li>
+            </ul>
+        </div>
     </div>
 </nav>
 
 <div class="container my-4">
-    <h1 class="mb-4">
-        <span th:if="${variant.id == null}">
-            <i class="fas fa-plus"></i> Ajouter une variante
-        </span>
-        <span th:if="${variant.id != null}">
-            <i class="fas fa-edit"></i> Modifier la variante
-        </span>
-        <small class="text-muted">pour <span th:text="${product.name}">Produit</span></small>
-    </h1>
-
     <div class="row">
-        <div class="col-12 col-md-8 col-lg-6">
-            <form th:action="${variant.id == null ? '/merchant/variants/save' : '/merchant/variants/update/' + variant.id}"
-                  method="post" class="card p-4">
-
-                <input type="hidden" name="productId" th:value="${product.id}">
-
-                <div class="mb-3">
-                    <label for="name" class="form-label fw-bold">Nom de la variante *</label>
-                    <input type="text" class="form-control" id="name" name="name"
-                           th:value="${variant.name}"
-                           required placeholder="Ex: Bleu / M">
+        <div class="col-12 col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <span th:if="${variant.id == null}">
+                            <i class="fas fa-plus"></i> Ajouter une variante
+                        </span>
+                        <span th:if="${variant.id != null}">
+                            <i class="fas fa-edit"></i> Modifier la variante
+                        </span>
+                        <small class="text-light ms-2">pour <span th:text="${product.name}">Produit</span></small>
+                    </h4>
                 </div>
+                <div class="card-body">
+                    <form th:action="${variant.id == null ? '/merchant/variants/save' : '/merchant/variants/update/' + variant.id}"
+                          method="post">
 
-                <div class="mb-3">
-                    <label for="attribute1" class="form-label fw-bold">Attribut 1 (ex: Couleur) *</label>
-                    <input type="text" class="form-control" id="attribute1" name="attribute1"
-                           th:value="${variant.attribute1}"
-                           required placeholder="Ex: Bleu">
-                </div>
+                        <input type="hidden" name="productId" th:value="${product.id}">
 
-                <div class="mb-3">
-                    <label for="attribute2" class="form-label fw-bold">Attribut 2 (ex: Taille)</label>
-                    <input type="text" class="form-control" id="attribute2" name="attribute2"
-                           th:value="${variant.attribute2}"
-                           placeholder="Ex: M">
-                </div>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">
+                                <i class="fas fa-tag text-primary"></i> Nom de la variante *
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="name" name="name"
+                                   th:value="${variant.name}"
+                                   required placeholder="Ex: Bleu / M">
+                        </div>
 
-                <div class="mb-3">
-                    <label for="price" class="form-label fw-bold">
-                        <i class="fas fa-money-bill-wave"></i> Prix (FCFA) *
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text">CFA</span>
-                        <input type="number" class="form-control" id="price" name="price"
-                               th:value="${variant.price}"
-                               step="1" min="0" required placeholder="Ex: 1000">
-                    </div>
-                    <small class="text-muted">Entrez le prix en Francs CFA (FCFA)</small>
-                </div>
+                        <div class="row">
+                            <div class="col-12 col-md-6">
+                                <div class="mb-3">
+                                    <label for="attribute1" class="form-label">
+                                        <i class="fas fa-palette text-primary"></i> Attribut 1 (ex: Couleur) *
+                                    </label>
+                                    <input type="text" class="form-control" id="attribute1" name="attribute1"
+                                           th:value="${variant.attribute1}"
+                                           required placeholder="Ex: Bleu">
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="mb-3">
+                                    <label for="attribute2" class="form-label">
+                                        <i class="fas fa-ruler text-primary"></i> Attribut 2 (ex: Taille)
+                                    </label>
+                                    <input type="text" class="form-control" id="attribute2" name="attribute2"
+                                           th:value="${variant.attribute2}"
+                                           placeholder="Ex: M">
+                                </div>
+                            </div>
+                        </div>
 
-                <div class="mb-3">
-                    <label for="stockQuantity" class="form-label fw-bold">Stock *</label>
-                    <input type="number" class="form-control" id="stockQuantity" name="stockQuantity"
-                           th:value="${variant.stockQuantity}"
-                           min="0" required>
-                </div>
+                        <div class="row">
+                            <div class="col-12 col-md-6">
+                                <div class="mb-3">
+                                    <label for="price" class="form-label">
+                                        <i class="fas fa-money-bill-wave text-primary"></i> Prix (FCFA) *
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">CFA</span>
+                                        <input type="number" class="form-control form-control-lg" id="price" name="price"
+                                               th:value="${variant.price}"
+                                               step="1" min="0" required placeholder="Ex: 1000">
+                                    </div>
+                                    <small class="text-muted">Entrez le prix en Francs CFA (FCFA)</small>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="mb-3">
+                                    <label for="stockQuantity" class="form-label">
+                                        <i class="fas fa-boxes text-primary"></i> Stock *
+                                    </label>
+                                    <input type="number" class="form-control form-control-lg" id="stockQuantity" name="stockQuantity"
+                                           th:value="${variant.stockQuantity}"
+                                           min="0" required>
+                                </div>
+                            </div>
+                        </div>
 
-                <div class="mb-3">
-                    <label for="sku" class="form-label fw-bold">SKU (Code unique) *</label>
-                    <input type="text" class="form-control" id="sku" name="sku"
-                           th:value="${variant.sku}"
-                           required placeholder="Ex: TSHIRT-BLEU-M">
-                </div>
+                        <div class="mb-3">
+                            <label for="sku" class="form-label">
+                                <i class="fas fa-barcode text-primary"></i> SKU (Code unique) *
+                            </label>
+                            <input type="text" class="form-control" id="sku" name="sku"
+                                   th:value="${variant.sku}"
+                                   required placeholder="Ex: TSHIRT-BLEU-M">
+                            <small class="text-muted">Code unique pour identifier cette variante</small>
+                        </div>
 
-                <div class="mb-3">
-                    <label for="imageUrl" class="form-label fw-bold">
-                        <i class="fas fa-image"></i> URL de l'image
-                    </label>
-                    <input type="url" class="form-control" id="imageUrl" name="imageUrl"
-                           th:value="${variant.imageUrl}"
-                           placeholder="https://images.unsplash.com/photo-...">
-                    <small class="text-muted">Laissez vide pour utiliser l'image du produit</small>
-                </div>
+                        <div class="mb-3">
+                            <label for="imageUrl" class="form-label">
+                                <i class="fas fa-image text-primary"></i> URL de l'image
+                            </label>
+                            <input type="url" class="form-control" id="imageUrl" name="imageUrl"
+                                   th:value="${variant.imageUrl}"
+                                   placeholder="https://images.unsplash.com/photo-...">
+                            <small class="text-muted">Laissez vide pour utiliser l'image du produit</small>
+                        </div>
 
-                <div th:if="${variant.imageUrl != null and variant.imageUrl != ''}" class="mb-3">
-                    <label class="form-label fw-bold">Aperçu :</label>
-                    <br>
-                    <img th:src="${variant.imageUrl}"
-                         th:alt="${variant.name}"
-                         style="max-height:100px; max-width:100%;"
-                         class="rounded border">
-                </div>
+                        <!-- Aperçu de l'image -->
+                        <div th:if="${variant.imageUrl != null and variant.imageUrl != ''}" class="mb-3">
+                            <label class="form-label">Aperçu :</label>
+                            <br>
+                            <img th:src="${variant.imageUrl}"
+                                 th:alt="${variant.name}"
+                                 style="max-height:100px; max-width:100%;"
+                                 class="rounded border">
+                        </div>
 
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save"></i> Enregistrer
-                    </button>
-                    <a th:href="@{/merchant/variants/product/{id}(id=${product.id})}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Retour
-                    </a>
+                        <hr>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save"></i> Enregistrer
+                            </button>
+                            <a th:href="@{/merchant/variants/product/{id}(id=${product.id})}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </a>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
