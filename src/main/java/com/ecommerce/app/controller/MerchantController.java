@@ -62,10 +62,9 @@ public class MerchantController {
         double totalRevenue = orderService.getTotalRevenueByMerchant(currentUser.getId());
         long pendingOrders = orderService.countPendingOrdersByMerchant(currentUser.getId());
 
-        // 🔥 RÉCUPÉRER LE NOMBRE DE NOTIFICATIONS NON LUES
-        long unreadCount = notificationService.getUnreadCount(currentUser);
+        // 🔥 RÉCUPÉRER LE NOMBRE DE COMMANDES EN ATTENTE (pour le badge)
+        long newOrdersCount = orderService.countPendingOrdersByMerchant(currentUser.getId());
 
-        // Convertir le chiffre d'affaires dans la devise actuelle
         BigDecimal convertedRevenue = currencyService.convert(BigDecimal.valueOf(totalRevenue));
 
         // Données pour les graphiques
@@ -111,7 +110,7 @@ public class MerchantController {
         model.addAttribute("totalRevenue", totalRevenue);
         model.addAttribute("convertedRevenue", convertedRevenue);
         model.addAttribute("pendingOrders", pendingOrders);
-        model.addAttribute("unreadCount", unreadCount);  // 🔥 AJOUTÉ
+        model.addAttribute("newOrdersCount", newOrdersCount);  // 🔥 AJOUTÉ
 
         model.addAttribute("salesLabels", salesLabels);
         model.addAttribute("salesData", salesValues);
@@ -547,45 +546,5 @@ public class MerchantController {
             redirectAttributes.addFlashAttribute("error", "❌ Erreur : " + e.getMessage());
         }
         return "redirect:/merchant/orders";
-    }
-
-    // ============================================================
-    // 🔥 NOTIFICATIONS
-    // ============================================================
-    @GetMapping("/notifications")
-    public String getNotifications(Model model) {
-        User currentUser = getCurrentUser();
-        List<Notification> notifications = notificationService.getAllNotifications(currentUser);
-        long unreadCount = notificationService.getUnreadCount(currentUser);
-
-        model.addAttribute("notifications", notifications);
-        model.addAttribute("unreadCount", unreadCount);
-        model.addAttribute("pageTitle", "Notifications - E-Shop");
-        model.addAttribute("currencyService", currencyService);
-        model.addAttribute("currentUrl", "/merchant/notifications");
-        return "merchant/notifications";
-    }
-
-    @PostMapping("/notifications/mark-all-read")
-    public String markAllNotificationsRead(RedirectAttributes redirectAttributes) {
-        try {
-            User currentUser = getCurrentUser();
-            notificationService.markAllAsRead(currentUser);
-            redirectAttributes.addFlashAttribute("success", "✅ Toutes les notifications ont été marquées comme lues");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "❌ Erreur: " + e.getMessage());
-        }
-        return "redirect:/merchant/notifications";
-    }
-
-    @PostMapping("/notifications/mark-read/{id}")
-    public String markNotificationRead(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        try {
-            User currentUser = getCurrentUser();
-            notificationService.markAsRead(id, currentUser);
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "❌ Erreur: " + e.getMessage());
-        }
-        return "redirect:/merchant/notifications";
     }
 }

@@ -63,16 +63,16 @@
                 <li class="nav-item"><a class="nav-link active" href="/merchant/dashboard">Dashboard</a></li>
                 <li class="nav-item"><a class="nav-link" href="/merchant/products">Mes produits</a></li>
                 <li class="nav-item"><a class="nav-link" href="/merchant/categories">Mes catégories</a></li>
-                <li class="nav-item"><a class="nav-link" href="/merchant/orders">Commandes</a></li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/merchant/notifications">
-                        <i class="fas fa-bell"></i>
-                        Notifications
-                        <span th:if="${unreadCount > 0}"
-                              class="badge bg-danger notification-badge"
-                              th:text="${unreadCount}">0</span>
+                <!-- 🔥 MENU COMMANDES AVEC BADGE -->
+                <li class="nav-item position-relative">
+                    <a class="nav-link" href="/merchant/orders">
+                        <i class="fas fa-shopping-cart"></i> Commandes
+                        <span th:if="${pendingOrders > 0}"
+                              class="badge bg-danger rounded-pill notification-badge"
+                              th:text="${pendingOrders}">0</span>
                     </a>
                 </li>
+                <!-- 🔥 SUPPRESSION DU MENU NOTIFICATIONS -->
             </ul>
             <ul class="navbar-nav">
                 <li class="nav-item dropdown currency-dropdown">
@@ -260,7 +260,7 @@
                              onerror="this.src='https://via.placeholder.com/50x50?text=Image'">
                     </td>
                     <td th:text="${product.name}">Nom</td>
-                    <td th:text="${currencyService.formatPrice(product.price)}">€0</td>
+                    <td th:text="${currencyService.formatPrice(product.price)}">CFA 0</td>
                     <td th:text="${product.category.name}">Catégorie</td>
                     <td th:text="${product.stockQuantity}">0</td>
                     <td>
