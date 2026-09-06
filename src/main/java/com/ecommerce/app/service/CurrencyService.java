@@ -12,6 +12,7 @@ import java.util.Locale;
 public class CurrencyService {
 
     private static final double EUR_TO_XOF = 655.96;
+    private static final double USD_TO_XOF = 590.0; // Taux approximatif
 
     @Value("${currency.default:XOF}")
     private String defaultCurrency;
@@ -21,6 +22,9 @@ public class CurrencyService {
     @PostConstruct
     public void init() {
         this.currentCurrency = defaultCurrency;
+        System.out.println("========================================");
+        System.out.println("💰 DEVISE PAR DÉFAUT : " + currentCurrency);
+        System.out.println("========================================");
     }
 
     public enum Currency {
@@ -46,6 +50,7 @@ public class CurrencyService {
     public void setCurrency(String currency) {
         if (currency.equals("EUR") || currency.equals("USD") || currency.equals("XOF")) {
             this.currentCurrency = currency;
+            System.out.println("💰 Devise changée : " + currentCurrency);
         }
     }
 
@@ -62,48 +67,54 @@ public class CurrencyService {
         return Currency.XOF;
     }
 
-    public BigDecimal convert(BigDecimal amountInEuro) {
-        if (amountInEuro == null) return BigDecimal.ZERO;
+    /**
+     * 🔥 Convertit un prix depuis le FCFA vers la devise choisie
+     * @param amountInXOF Montant en FCFA
+     * @return Montant converti dans la devise actuelle
+     */
+    public BigDecimal convertFromXOF(BigDecimal amountInXOF) {
+        if (amountInXOF == null) return BigDecimal.ZERO;
+
         switch (currentCurrency) {
+            case "EUR":
+                return amountInXOF.divide(BigDecimal.valueOf(EUR_TO_XOF), 2, RoundingMode.HALF_UP);
             case "USD":
-                return amountInEuro.multiply(BigDecimal.valueOf(1.08))
-                        .setScale(2, RoundingMode.HALF_UP);
+                return amountInXOF.divide(BigDecimal.valueOf(USD_TO_XOF), 2, RoundingMode.HALF_UP);
             case "XOF":
-                // 🔥 SOLUTION : Arrondir à l'entier le plus proche
-                return amountInEuro.multiply(BigDecimal.valueOf(EUR_TO_XOF))
-                        .setScale(0, RoundingMode.HALF_UP);
             default:
-                return amountInEuro.setScale(2, RoundingMode.HALF_UP);
+                return amountInXOF.setScale(0, RoundingMode.HALF_UP);
         }
     }
 
-    public String formatPrice(BigDecimal amountInEuro) {
-        BigDecimal converted = convert(amountInEuro);
+    /**
+     * 🔥 Formate un prix en FCFA vers la devise choisie
+     * @param amountInXOF Montant en FCFA
+     * @return Prix formaté avec symbole de la devise
+     */
+    public String formatPrice(BigDecimal amountInXOF) {
+        if (amountInXOF == null) return getSymbol() + " 0";
+
+        BigDecimal converted = convertFromXOF(amountInXOF);
         Currency currencyInfo = getCurrencyInfo();
-        NumberFormat formatter;
+
+        NumberFormat formatter = NumberFormat.getInstance(Locale.FRENCH);
+
         if (currentCurrency.equals("XOF")) {
-            formatter = NumberFormat.getInstance(Locale.FRENCH);
             formatter.setMaximumFractionDigits(0);
             formatter.setMinimumFractionDigits(0);
         } else {
-            formatter = NumberFormat.getInstance(Locale.FRENCH);
             formatter.setMaximumFractionDigits(2);
             formatter.setMinimumFractionDigits(2);
         }
+
         return currencyInfo.getSymbol() + " " + formatter.format(converted);
     }
 
-    public String formatPrice(double amountInEuro) {
-        return formatPrice(BigDecimal.valueOf(amountInEuro));
+    public String formatPrice(double amountInXOF) {
+        return formatPrice(BigDecimal.valueOf(amountInXOF));
     }
 
     public String getSymbol() {
         return getCurrencyInfo().getSymbol();
-    }
-
-    // 🔥 NOUVEAU : Convertir FCFA → EUR pour le stockage
-    public BigDecimal convertXOFToEuro(BigDecimal amountInXOF) {
-        if (amountInXOF == null) return BigDecimal.ZERO;
-        return amountInXOF.divide(BigDecimal.valueOf(EUR_TO_XOF), 4, RoundingMode.HALF_UP);
     }
 }

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +62,7 @@ public class MerchantController {
         double totalRevenue = orderService.getTotalRevenueByMerchant(currentUser.getId());
         long pendingOrders = orderService.countPendingOrdersByMerchant(currentUser.getId());
 
-        BigDecimal convertedRevenue = currencyService.convert(BigDecimal.valueOf(totalRevenue));
+        BigDecimal convertedRevenue = currencyService.convertFromXOF(BigDecimal.valueOf(totalRevenue));
 
         List<Object[]> salesData = orderService.getSalesLast7Days(currentUser.getId());
         List<String> salesLabels = new ArrayList<>();
@@ -151,6 +150,7 @@ public class MerchantController {
         return "merchant/product-form";
     }
 
+    // 🔥 SANS CONVERSION : le prix est directement en FCFA
     @PostMapping("/products/save")
     public String saveProduct(
             @ModelAttribute Product product,
@@ -160,11 +160,6 @@ public class MerchantController {
             User currentUser = getCurrentUser();
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new RuntimeException("Catégorie non trouvée"));
-
-            // 🔥 Convertir le prix de FCFA vers EUR pour le stockage
-            BigDecimal priceInXOF = product.getPrice();
-            BigDecimal priceInEuro = currencyService.convertXOFToEuro(priceInXOF);
-            product.setPrice(priceInEuro);
 
             product.setCategory(category);
             product.setUser(currentUser);
@@ -264,6 +259,7 @@ public class MerchantController {
         return "merchant/variant-form";
     }
 
+    // 🔥 SANS CONVERSION : le prix est directement en FCFA
     @PostMapping("/variants/save")
     public String saveVariant(
             @RequestParam Long productId,
@@ -286,15 +282,12 @@ public class MerchantController {
                 return "redirect:/merchant/products";
             }
 
-            // 🔥 Convertir le prix de FCFA vers EUR pour le stockage
-            BigDecimal priceInEuro = currencyService.convertXOFToEuro(price);
-
             ProductVariant variant = new ProductVariant();
             variant.setProduct(product);
             variant.setName(name);
             variant.setAttribute1(attribute1);
             variant.setAttribute2(attribute2);
-            variant.setPrice(priceInEuro);
+            variant.setPrice(price);  // Directement en FCFA
             variant.setStockQuantity(stockQuantity);
             variant.setSku(sku);
             variant.setImageUrl(imageUrl);
@@ -334,6 +327,7 @@ public class MerchantController {
         }
     }
 
+    // 🔥 SANS CONVERSION : le prix est directement en FCFA
     @PostMapping("/variants/update/{id}")
     public String updateVariant(
             @PathVariable Long id,
@@ -360,13 +354,10 @@ public class MerchantController {
             ProductVariant variant = productVariantRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Variante non trouvée"));
 
-            // 🔥 Convertir le prix de FCFA vers EUR pour le stockage
-            BigDecimal priceInEuro = currencyService.convertXOFToEuro(price);
-
             variant.setName(name);
             variant.setAttribute1(attribute1);
             variant.setAttribute2(attribute2);
-            variant.setPrice(priceInEuro);
+            variant.setPrice(price);  // Directement en FCFA
             variant.setStockQuantity(stockQuantity);
             variant.setSku(sku);
             variant.setImageUrl(imageUrl);
