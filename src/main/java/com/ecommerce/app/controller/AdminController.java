@@ -63,7 +63,8 @@ public class AdminController {
         long activeMerchants = totalMerchants - blockedMerchants;
         double totalRevenue = orderService.getTotalRevenue();
 
-        BigDecimal convertedRevenue = currencyService.convert(BigDecimal.valueOf(totalRevenue));
+        // 🔥 MODIFIÉ : utiliser convertFromXOF au lieu de convert
+        BigDecimal convertedRevenue = currencyService.convertFromXOF(BigDecimal.valueOf(totalRevenue));
 
         // 1. Ventes des 7 derniers jours
         List<Object[]> salesData = orderService.getGlobalSalesLast7Days();
@@ -172,7 +173,7 @@ public class AdminController {
     }
 
     // ============================================================
-    // 🔥 BLOCAGE TEMPORAIRE
+    // BLOCAGE TEMPORAIRE
     // ============================================================
     @PostMapping("/merchants/block-temporary/{id}")
     public String blockTemporary(
@@ -231,7 +232,7 @@ public class AdminController {
     }
 
     // ============================================================
-    // 🔥 BLOCAGE DÉFINITIF
+    // BLOCAGE DÉFINITIF
     // ============================================================
     @PostMapping("/merchants/block-permanent/{id}")
     public String blockPermanent(
@@ -270,7 +271,7 @@ public class AdminController {
     }
 
     // ============================================================
-    // 🔥 DÉBLOCAGE
+    // DÉBLOCAGE
     // ============================================================
     @PostMapping("/merchants/unblock/{id}")
     public String unblockMerchant(@PathVariable Long id, RedirectAttributes redirectAttributes) {
@@ -297,7 +298,7 @@ public class AdminController {
     }
 
     // ============================================================
-    // 🔥 SUPPRIMER UN COMMERÇANT
+    // SUPPRIMER UN COMMERÇANT
     // ============================================================
     @PostMapping("/merchants/delete/{id}")
     public String deleteMerchant(@PathVariable Long id, RedirectAttributes redirectAttributes) {
