@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/products")
@@ -66,12 +68,28 @@ public class ProductController {
             products = productService.getAllProducts();
         }
 
+        // 🔥 Récupérer l'utilisateur connecté et ses favoris
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        List<Long> favoriteIds = new ArrayList<>();
+
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+            String username = auth.getName();
+            User currentUser = userRepository.findByUsername(username).orElse(null);
+            if (currentUser != null) {
+                favoriteIds = favoriteService.getFavoriteProductsByUser(currentUser).stream()
+                        .map(Product::getId)
+                        .collect(Collectors.toList());
+            }
+        }
+
         model.addAttribute("products", products);
         model.addAttribute("categories", categoryService.getAllCategories());
         model.addAttribute("pageTitle", "Produits - E-Shop");
         model.addAttribute("cartService", cartService);
         model.addAttribute("currencyService", currencyService);
         model.addAttribute("currentUrl", "/products");
+        model.addAttribute("favoriteIds", favoriteIds);  // 🔥 AJOUTÉ
+        model.addAttribute("favoriteService", favoriteService);  // 🔥 AJOUTÉ
         return "products/list";
     }
 
