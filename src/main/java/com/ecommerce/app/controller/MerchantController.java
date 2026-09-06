@@ -44,8 +44,6 @@ public class MerchantController {
     @Autowired
     private NotificationService notificationService;
 
-    private static final double XOF_TO_EUR = 1.0 / 655.96;
-
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
@@ -163,10 +161,9 @@ public class MerchantController {
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new RuntimeException("Catégorie non trouvée"));
 
-            // 🔥 CONVERTIR LE PRIX DE FCFA → EUR
+            // 🔥 Convertir le prix de FCFA vers EUR pour le stockage
             BigDecimal priceInXOF = product.getPrice();
-            BigDecimal priceInEuro = priceInXOF.multiply(BigDecimal.valueOf(XOF_TO_EUR))
-                    .setScale(2, RoundingMode.HALF_UP);
+            BigDecimal priceInEuro = currencyService.convertXOFToEuro(priceInXOF);
             product.setPrice(priceInEuro);
 
             product.setCategory(category);
@@ -289,9 +286,8 @@ public class MerchantController {
                 return "redirect:/merchant/products";
             }
 
-            // 🔥 CONVERTIR LE PRIX DE FCFA → EUR
-            BigDecimal priceInEuro = price.multiply(BigDecimal.valueOf(XOF_TO_EUR))
-                    .setScale(2, RoundingMode.HALF_UP);
+            // 🔥 Convertir le prix de FCFA vers EUR pour le stockage
+            BigDecimal priceInEuro = currencyService.convertXOFToEuro(price);
 
             ProductVariant variant = new ProductVariant();
             variant.setProduct(product);
@@ -364,9 +360,8 @@ public class MerchantController {
             ProductVariant variant = productVariantRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Variante non trouvée"));
 
-            // 🔥 CONVERTIR LE PRIX DE FCFA → EUR
-            BigDecimal priceInEuro = price.multiply(BigDecimal.valueOf(XOF_TO_EUR))
-                    .setScale(2, RoundingMode.HALF_UP);
+            // 🔥 Convertir le prix de FCFA vers EUR pour le stockage
+            BigDecimal priceInEuro = currencyService.convertXOFToEuro(price);
 
             variant.setName(name);
             variant.setAttribute1(attribute1);
