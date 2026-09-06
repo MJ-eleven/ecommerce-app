@@ -29,9 +29,9 @@ public class PaymentController {
     public String paymentPage(@PathVariable Long orderId, Model model) {
         try {
             Order order = orderService.getOrderById(orderId);
-            String publicKey = stripeService.getPublicKey();
 
-            // 🔥 LOG POUR VÉRIFICATION
+            // 🔥 RÉCUPÉRER LA CLÉ PUBLIQUE
+            String publicKey = stripeService.getPublicKey();
             System.out.println("🔑 Clé publique envoyée à la vue: " + publicKey);
 
             model.addAttribute("order", order);

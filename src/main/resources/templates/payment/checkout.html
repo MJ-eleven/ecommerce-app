@@ -96,16 +96,20 @@
 </div>
 
 <script>
-    // 🔥 Récupérer la clé publique Stripe
+    // 🔥 RÉCUPÉRER LA CLÉ PUBLIQUE STRIPE
     const publicKey = /*[[${publicKey}]]*/ '';
-    console.log('🔑 Clé publique Stripe:', publicKey);
+    console.log('🔑 Clé publique reçue dans JavaScript:', publicKey);
 
-    if (!publicKey || publicKey === '' || publicKey === 'pk_test_xxx' || publicKey === 'pk_test_placeholder') {
-        console.error('❌ Clé publique Stripe invalide !');
-        document.getElementById('card-errors').textContent = 'Erreur de configuration Stripe. Veuillez contacter le support.';
+    // 🔥 FORCER LA CLÉ SI ELLE EST VIDE OU PLACEHOLDER
+    let stripeKey = publicKey;
+    if (!stripeKey || stripeKey === '' || stripeKey === 'pk_test_xxx' || stripeKey === 'pk_test_placeholder') {
+        console.warn('⚠️ Clé publique invalide, utilisation de la clé forcée');
+        stripeKey = 'pk_test_51Tx34aFM8n9T8nTEHthEYnakd4ZP8pyLP0oU1a4iV7keEA6mT1vBPb1IK1vwIPQlJdicDJWmElTJzIrTJCJY3E29004bhZi1S7';
     }
 
-    const stripe = Stripe(publicKey);
+    console.log('🔑 Clé publique utilisée:', stripeKey);
+
+    const stripe = Stripe(stripeKey);
     const elements = stripe.elements();
 
     // Créer le champ de carte

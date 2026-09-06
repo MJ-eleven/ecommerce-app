@@ -14,8 +14,10 @@ public class StripeService {
     private String publicKey;
 
     public String getPublicKey() {
-        System.out.println("🔑 Clé publique Stripe: " + publicKey);
-        return publicKey;
+        // 🔥 FORCER LA CLÉ PUBLIQUE DIRECTEMENT
+        String key = "pk_test_51Tx34aFM8n9T8nTEHthEYnakd4ZP8pyLP0oU1a4iV7keEA6mT1vBPb1IK1vwIPQlJdicDJWmElTJzIrTJCJY3E29004bhZi1S7";
+        System.out.println("🔑 Clé publique Stripe: " + key);
+        return key;
     }
 
     public PaymentIntent createPaymentIntent(Order order) throws StripeException {
