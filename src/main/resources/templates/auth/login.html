@@ -32,36 +32,42 @@
             <div class="card-body p-4">
 
                 <!-- MESSAGE DE BLOCAGE -->
-                <div th:if="${param.error == 'blocked'}" class="alert alert-danger blocked-message">
+                <div th:if="${blocked}" class="alert alert-danger blocked-message">
                     <div class="text-center">
                         <i class="fas fa-ban fa-3x text-danger mb-3"></i>
                         <h4 class="text-danger fw-bold">⛔ Compte bloqué</h4>
                         <hr>
-                        <p class="mb-0" style="font-size: 1.1rem;">Votre compte a été bloqué par l'administrateur.</p>
+                        <p class="mb-0" style="font-size: 1.1rem;" th:text="${errorMessage}">Votre compte a été bloqué par l'administrateur.</p>
                         <p class="text-muted small mt-3"><i class="fas fa-info-circle"></i> Contactez l'administrateur.</p>
                     </div>
                 </div>
 
                 <!-- MESSAGE D'ERREUR CLASSIQUE -->
-                <div th:if="${param.error != null and param.error != 'blocked'}" class="alert alert-danger">
+                <div th:if="${error}" class="alert alert-danger">
                     <i class="fas fa-exclamation-circle"></i>
-                    <strong>Erreur de connexion</strong><br>Nom d'utilisateur ou mot de passe incorrect.
+                    <strong>Erreur de connexion</strong><br>
+                    <span th:text="${errorMessage}">Nom d'utilisateur ou mot de passe incorrect.</span>
                 </div>
 
                 <!-- SUCCÈS -->
                 <div th:if="${param.registered}" class="alert alert-success">
-                    <i class="fas fa-check-circle"></i> <strong>Inscription réussie !</strong>
+                    <i class="fas fa-check-circle"></i> <strong>Inscription réussie !</strong> Connectez-vous maintenant.
                 </div>
 
-                <form th:action="@{/login}" method="post">
+                <!-- DECONNEXION -->
+                <div th:if="${param.logout}" class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Vous êtes déconnecté.
+                </div>
+
+                <form th:action="@{/login}" method="post" id="loginForm">
                     <div class="mb-3">
-                        <label class="form-label fw-bold"><i class="fas fa-user"></i> Nom d'utilisateur</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
+                        <label for="username" class="form-label fw-bold"><i class="fas fa-user"></i> Nom d'utilisateur</label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Entrez votre nom d'utilisateur" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold"><i class="fas fa-lock"></i> Mot de passe</label>
+                        <label for="password" class="form-label fw-bold"><i class="fas fa-lock"></i> Mot de passe</label>
                         <div class="password-wrapper">
-                            <input type="password" class="form-control" id="password" name="password" required>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Entrez votre mot de passe" required>
                             <button type="button" class="password-toggle" id="togglePassword"><i class="fas fa-eye"></i></button>
                         </div>
                     </div>
@@ -77,12 +83,21 @@
 </div>
 
 <script>
+    // Afficher/masquer le mot de passe
     document.getElementById('togglePassword')?.addEventListener('click', function() {
         const input = document.getElementById('password');
         const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
         input.setAttribute('type', type);
         this.querySelector('i').classList.toggle('fa-eye');
         this.querySelector('i').classList.toggle('fa-eye-slash');
+    });
+
+    // 🔥 PASSER LE USERNAME DANS L'URL
+    document.getElementById('loginForm')?.addEventListener('submit', function(e) {
+        const username = document.getElementById('username').value.trim();
+        if (username) {
+            this.action = '/login?username=' + encodeURIComponent(username);
+        }
     });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

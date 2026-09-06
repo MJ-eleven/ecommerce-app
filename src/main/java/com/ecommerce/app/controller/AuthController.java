@@ -29,6 +29,8 @@ public class AuthController {
             @RequestParam(value = "username", required = false) String username,
             Model model) {
 
+        System.out.println("🔍 PAGE LOGIN - error: " + error + ", username: " + username);
+
         // 🔥 VÉRIFIER LE BLOCAGE
         if (username != null && !username.isEmpty()) {
             User user = userRepository.findByUsername(username).orElse(null);
@@ -41,6 +43,7 @@ public class AuthController {
 
         if (error != null && !"blocked".equals(error)) {
             model.addAttribute("error", true);
+            model.addAttribute("errorMessage", "Nom d'utilisateur ou mot de passe incorrect.");
         }
 
         if (logout != null) {
