@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${pageTitle}">E-Shop</title>
 
-    <!-- ICÔNES POUR ÉCRAN D'ACCUEIL -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -14,14 +13,28 @@
     <link rel="manifest" href="/site.webmanifest">
     <meta name="theme-color" content="#2c3e50">
 
-    <!-- POUR L'APPLICATION MOBILE -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="E-Shop">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <style>
+        /* ============================================================
+           STYLES GÉNÉRAUX
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f8f9fa;
+        }
+
         .hero-section {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -29,6 +42,472 @@
             border-radius: 15px;
             margin-bottom: 40px;
         }
+
+        /* ============================================================
+           CARROUSEL MODERNE - STYLE PREMIUM
+           ============================================================ */
+        .hero-carousel-container {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            margin-bottom: 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            background: #0a0a0a;
+        }
+
+        .hero-carousel {
+            position: relative;
+            width: 100%;
+            height: 85vh;
+            min-height: 500px;
+            max-height: 700px;
+        }
+
+        .hero-carousel .carousel-inner {
+            height: 100%;
+        }
+
+        .hero-carousel .carousel-item {
+            height: 100%;
+            position: relative;
+        }
+
+        .hero-carousel .carousel-item::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                135deg,
+                rgba(0, 0, 0, 0.7) 0%,
+                rgba(0, 0, 0, 0.3) 40%,
+                rgba(0, 0, 0, 0.1) 70%,
+                rgba(0, 0, 0, 0) 100%
+            );
+            z-index: 1;
+        }
+
+        .hero-carousel .carousel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1);
+            transition: transform 8s ease;
+        }
+
+        .hero-carousel .carousel-item.active img {
+            transform: scale(1.08);
+        }
+
+        /* Overlay content */
+        .carousel-content {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            padding: 0 60px;
+            z-index: 2;
+            width: 100%;
+            max-width: 1400px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .carousel-content * {
+            pointer-events: auto;
+        }
+
+        .carousel-content .slide-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 6px 20px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .carousel-content .slide-title {
+            font-size: clamp(2rem, 5vw, 4.5rem);
+            font-weight: 800;
+            color: white;
+            line-height: 1.1;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
+        }
+
+        .carousel-content .slide-title .highlight {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .carousel-content .slide-desc {
+            font-size: clamp(0.95rem, 1.3vw, 1.3rem);
+            color: rgba(255, 255, 255, 0.85);
+            max-width: 550px;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .carousel-content .slide-meta {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .carousel-content .slide-price {
+            font-size: clamp(1.5rem, 2.5vw, 2.8rem);
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .carousel-content .slide-price .currency-symbol {
+            font-size: 0.7em;
+            opacity: 0.7;
+        }
+
+        .carousel-content .slide-stock {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .carousel-content .slide-stock i {
+            color: #4ade80;
+        }
+
+        .carousel-content .slide-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .carousel-content .btn-slide {
+            padding: 14px 35px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+            pointer-events: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .carousel-content .btn-slide-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .carousel-content .btn-slide-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        .carousel-content .btn-slide-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .carousel-content .btn-slide-secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-3px);
+        }
+
+        /* Indicateurs stylisés */
+        .hero-carousel .carousel-indicators {
+            bottom: 30px;
+            gap: 10px;
+            z-index: 3;
+        }
+
+        .hero-carousel .carousel-indicators button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            background: transparent;
+            opacity: 1;
+            transition: all 0.4s ease;
+            margin: 0 4px;
+            padding: 0;
+        }
+
+        .hero-carousel .carousel-indicators button.active {
+            background: white;
+            border-color: white;
+            width: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .hero-carousel .carousel-indicators button:hover {
+            transform: scale(1.2);
+        }
+
+        /* Flèches de navigation */
+        .hero-carousel .carousel-control-prev,
+        .hero-carousel .carousel-control-next {
+            width: 60px;
+            height: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 3;
+        }
+
+        .hero-carousel:hover .carousel-control-prev,
+        .hero-carousel:hover .carousel-control-next {
+            opacity: 1;
+        }
+
+        .hero-carousel .carousel-control-prev {
+            left: 25px;
+        }
+
+        .hero-carousel .carousel-control-next {
+            right: 25px;
+        }
+
+        .hero-carousel .carousel-control-prev:hover,
+        .hero-carousel .carousel-control-next:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .hero-carousel .carousel-control-prev-icon,
+        .hero-carousel .carousel-control-next-icon {
+            width: 24px;
+            height: 24px;
+            filter: brightness(0) invert(1);
+        }
+
+        /* Numéro de slide */
+        .slide-counter {
+            position: absolute;
+            bottom: 30px;
+            right: 40px;
+            z-index: 3;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .slide-counter .current {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 992px) {
+            .hero-carousel {
+                height: 70vh;
+                min-height: 450px;
+                max-height: 600px;
+            }
+
+            .carousel-content {
+                padding: 0 35px;
+            }
+
+            .carousel-content .slide-title {
+                font-size: clamp(1.8rem, 4vw, 3rem);
+            }
+
+            .hero-carousel .carousel-control-prev,
+            .hero-carousel .carousel-control-next {
+                width: 45px;
+                height: 45px;
+                opacity: 0.6;
+            }
+
+            .hero-carousel .carousel-control-prev {
+                left: 15px;
+            }
+
+            .hero-carousel .carousel-control-next {
+                right: 15px;
+            }
+
+            .slide-counter {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-carousel {
+                height: 60vh;
+                min-height: 380px;
+                max-height: 500px;
+                border-radius: 16px;
+            }
+
+            .hero-carousel-container {
+                border-radius: 16px;
+                margin-bottom: 30px;
+            }
+
+            .carousel-content {
+                padding: 0 25px;
+                text-align: center;
+            }
+
+            .carousel-content .slide-title {
+                font-size: clamp(1.5rem, 5vw, 2.2rem);
+                max-width: 100%;
+            }
+
+            .carousel-content .slide-desc {
+                font-size: 0.9rem;
+                max-width: 100%;
+                -webkit-line-clamp: 2;
+            }
+
+            .carousel-content .slide-meta {
+                justify-content: center;
+                gap: 15px;
+            }
+
+            .carousel-content .slide-price {
+                font-size: clamp(1.2rem, 3vw, 2rem);
+            }
+
+            .carousel-content .slide-actions {
+                justify-content: center;
+            }
+
+            .carousel-content .btn-slide {
+                padding: 10px 24px;
+                font-size: 0.85rem;
+            }
+
+            .hero-carousel .carousel-indicators {
+                bottom: 15px;
+                gap: 6px;
+            }
+
+            .hero-carousel .carousel-indicators button {
+                width: 8px;
+                height: 8px;
+            }
+
+            .hero-carousel .carousel-indicators button.active {
+                width: 25px;
+            }
+
+            .hero-carousel .carousel-control-prev,
+            .hero-carousel .carousel-control-next {
+                width: 35px;
+                height: 35px;
+                opacity: 0.5;
+            }
+
+            .hero-carousel .carousel-control-prev {
+                left: 8px;
+            }
+
+            .hero-carousel .carousel-control-next {
+                right: 8px;
+            }
+
+            .hero-carousel .carousel-control-prev-icon,
+            .hero-carousel .carousel-control-next-icon {
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-carousel {
+                height: 50vh;
+                min-height: 320px;
+                max-height: 420px;
+            }
+
+            .carousel-content {
+                padding: 0 16px;
+            }
+
+            .carousel-content .slide-title {
+                font-size: 1.3rem;
+            }
+
+            .carousel-content .slide-desc {
+                font-size: 0.8rem;
+                -webkit-line-clamp: 2;
+            }
+
+            .carousel-content .slide-badge {
+                font-size: 0.6rem;
+                padding: 4px 14px;
+                margin-bottom: 10px;
+            }
+
+            .carousel-content .btn-slide {
+                padding: 8px 18px;
+                font-size: 0.75rem;
+            }
+
+            .carousel-content .slide-meta {
+                gap: 10px;
+            }
+
+            .carousel-content .slide-price {
+                font-size: 1.1rem;
+            }
+
+            .hero-carousel .carousel-indicators button {
+                width: 6px;
+                height: 6px;
+            }
+
+            .hero-carousel .carousel-indicators button.active {
+                width: 18px;
+            }
+        }
+
+        /* ============================================================
+           AUTRES STYLES EXISTANTS
+           ============================================================ */
         .product-card {
             transition: transform 0.3s, box-shadow 0.3s;
             height: 100%;
@@ -83,211 +562,13 @@
             color: #6c757d;
             font-size: 0.9rem;
         }
-        /* STYLES POUR LE CARROUSEL TOP VENTES */
-        .top-products-carousel {
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-            padding: 30px 20px;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            border: 1px solid #e9ecef;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
-        }
-
-        .carousel-indicators {
-            position: relative;
-            margin-top: 20px;
-            margin-bottom: 0;
-        }
-
-        .carousel-indicators button {
-            width: 10px !important;
-            height: 10px !important;
-            border-radius: 50% !important;
-            background-color: #dee2e6 !important;
-            border: none !important;
-            margin: 0 5px !important;
-        }
-
-        .carousel-indicators button.active {
-            background-color: #0d6efd !important;
-            width: 25px !important;
-            border-radius: 10px !important;
-        }
-
-        .top-product-slide {
-            padding: 10px 5px;
-        }
-
-        .top-product-image-wrapper {
-            position: relative;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-
-        .top-product-image {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .top-product-image:hover {
-            transform: scale(1.03);
-        }
-
-        .rank-badge {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 15px rgba(238,90,36,0.4);
-            z-index: 5;
-        }
-
-        .top-product-info {
-            padding: 10px 20px;
-        }
-
-        .top-product-name {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-
-        .top-product-desc {
-            color: #6c757d;
-            font-size: 1rem;
-            margin-bottom: 15px;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .top-product-meta {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .top-product-price {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #0d6efd;
-        }
-
-        .top-product-stock {
-            color: #28a745;
-            font-size: 0.95rem;
-        }
-
-        .top-product-stock i {
-            margin-right: 5px;
-        }
-
-        .top-product-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .top-product-actions .btn {
-            padding: 10px 25px;
-            border-radius: 30px;
-            font-weight: 600;
-        }
-
-        .carousel-control-prev,
-        .carousel-control-next {
-            width: 40px;
-            height: 40px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(13, 110, 253, 0.9);
-            border-radius: 50%;
-            opacity: 0.8;
-        }
-
-        .carousel-control-prev {
-            left: -20px;
-        }
-
-        .carousel-control-next {
-            right: -20px;
-        }
-
-        .carousel-control-prev:hover,
-        .carousel-control-next:hover {
-            opacity: 1;
-        }
-
-        .carousel-control-prev-icon,
-        .carousel-control-next-icon {
-            background-size: 60%;
-            filter: brightness(0) invert(1);
-        }
-
-        @media (max-width: 768px) {
-            .top-product-image {
-                height: 200px;
-            }
-            .top-product-name {
-                font-size: 1.3rem;
-            }
-            .top-product-price {
-                font-size: 1.4rem;
-            }
-            .top-product-info {
-                padding: 15px 0;
-            }
-            .rank-badge {
-                width: 35px;
-                height: 35px;
-                font-size: 1rem;
-                top: 10px;
-                left: 10px;
-            }
-            .carousel-control-prev {
-                left: 5px;
-            }
-            .carousel-control-next {
-                right: 5px;
-            }
-            .carousel-control-prev,
-            .carousel-control-next {
-                width: 30px;
-                height: 30px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .top-product-image {
-                height: 150px;
-            }
-            .top-product-actions .btn {
-                padding: 6px 15px;
-                font-size: 0.85rem;
-            }
-            .top-product-meta {
-                gap: 10px;
-            }
-        }
     </style>
 </head>
 <body>
+
+<!-- ============================================================
+     NAVBAR
+     ============================================================ -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
         <a class="navbar-brand" href="/"><i class="fas fa-store"></i> E-Shop</a>
@@ -338,13 +619,99 @@
     </div>
 </nav>
 
+<!-- ============================================================
+     CARROUSEL MODERNE - TOP 5 PRODUITS
+     ============================================================ -->
+<div th:if="${topProducts != null and !topProducts.isEmpty()}" class="container">
+    <div class="hero-carousel-container">
+        <div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel" data-bs-interval="5000">
+
+            <!-- Indicateurs -->
+            <div class="carousel-indicators">
+                <button type="button" th:each="product, iterStat : ${topProducts}"
+                        data-bs-target="#heroCarousel"
+                        th:data-bs-slide-to="${iterStat.index}"
+                        th:classappend="${iterStat.first} ? 'active' : ''"
+                        aria-current="true">
+                </button>
+            </div>
+
+            <!-- Slides -->
+            <div class="carousel-inner">
+                <div class="carousel-item" th:each="product, iterStat : ${topProducts}"
+                     th:classappend="${iterStat.first} ? 'active' : ''">
+
+                    <!-- Image -->
+                    <img th:src="${product.imageUrl}"
+                         th:alt="${product.name}"
+                         onerror="this.src='https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=1200&h=700&fit=crop'">
+
+                    <!-- Contenu -->
+                    <div class="carousel-content">
+                        <div class="slide-badge">
+                            <i class="fas fa-fire" style="color: #f5576c;"></i>
+                            Top #<span th:text="${iterStat.index + 1}">1</span> des ventes
+                        </div>
+
+                        <h2 class="slide-title">
+                            <span th:text="${product.name}">Nom du produit</span>
+                            <br>
+                            <span class="highlight">Meilleure offre</span>
+                        </h2>
+
+                        <p class="slide-desc" th:text="${product.description}">Description du produit</p>
+
+                        <div class="slide-meta">
+                            <span class="slide-price">
+                                <span class="currency-symbol" th:text="${currencyService != null ? currencyService.getSymbol() : '€'}">€</span>
+                                <span th:text="${product.price}">0.00</span>
+                            </span>
+                            <span class="slide-stock">
+                                <i class="fas fa-box"></i>
+                                Stock: <span th:text="${product.stockQuantity}">0</span>
+                            </span>
+                        </div>
+
+                        <div class="slide-actions">
+                            <a th:href="@{/products/{id}(id=${product.id})}" class="btn-slide btn-slide-primary">
+                                <i class="fas fa-eye"></i> Voir le produit
+                            </a>
+                            <a th:href="@{/products/{id}/add-to-cart(id=${product.id}, quantity=1)}"
+                               class="btn-slide btn-slide-secondary">
+                                <i class="fas fa-cart-plus"></i> Ajouter
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flèches -->
+            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Précédent</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Suivant</span>
+            </button>
+
+            <!-- Compteur de slide -->
+            <div class="slide-counter">
+                <span class="current" id="slideCurrent">1</span>
+                <span> / <span id="slideTotal" th:text="${topProducts.size()}">5</span></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     HERO SECTION AVEC RECHERCHE
+     ============================================================ -->
 <div class="container">
-    <!-- Hero Section -->
     <div class="hero-section text-center">
         <h1><i class="fas fa-shopping-bag"></i> Bienvenue sur E-Shop</h1>
         <p class="lead">Découvrez notre sélection de produits exceptionnels</p>
 
-        <!-- Barre de recherche -->
         <div class="search-box">
             <form th:action="@{/}" method="get" class="d-flex">
                 <input type="text"
@@ -356,82 +723,6 @@
                     <i class="fas fa-search"></i>
                 </button>
             </form>
-        </div>
-    </div>
-
-    <!-- 🔥 CARROUSEL TOP 5 PRODUITS LES PLUS VENDUS -->
-    <div th:if="${topProducts != null and !topProducts.isEmpty()}" class="top-products-carousel">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="mb-0 fw-bold">
-                <i class="fas fa-fire text-danger"></i>
-                Top 5 des plus vendus
-                <span class="badge bg-warning text-dark ms-2">
-                        <i class="fas fa-star"></i> Meilleures ventes
-                    </span>
-            </h4>
-        </div>
-
-        <div id="topProductsCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
-            <!-- Indicateurs -->
-            <div class="carousel-indicators">
-                <button type="button" data-bs-target="#topProductsCarousel" data-bs-slide-to="0" class="active" aria-current="true"></button>
-                <button type="button" data-bs-target="#topProductsCarousel" data-bs-slide-to="1"></button>
-                <button type="button" data-bs-target="#topProductsCarousel" data-bs-slide-to="2"></button>
-                <button type="button" data-bs-target="#topProductsCarousel" data-bs-slide-to="3"></button>
-                <button type="button" data-bs-target="#topProductsCarousel" data-bs-slide-to="4"></button>
-            </div>
-
-            <div class="carousel-inner">
-                <!-- Chaque produit dans une slide séparée -->
-                <div class="carousel-item" th:each="product, iterStat : ${topProducts}"
-                     th:classappend="${iterStat.first} ? 'active' : ''">
-                    <div class="top-product-slide">
-                        <div class="row align-items-center">
-                            <!-- Image -->
-                            <div class="col-12 col-md-5">
-                                <div class="top-product-image-wrapper">
-                                    <span class="rank-badge" th:text="${iterStat.index + 1}">1</span>
-                                    <img th:src="${product.imageUrl}"
-                                         class="top-product-image"
-                                         th:alt="${product.name}"
-                                         onerror="this.src='https://via.placeholder.com/500x400?text=Product'">
-                                </div>
-                            </div>
-                            <!-- Infos -->
-                            <div class="col-12 col-md-7">
-                                <div class="top-product-info">
-                                    <h3 class="top-product-name" th:text="${product.name}">Nom du produit</h3>
-                                    <p class="top-product-desc" th:text="${product.description}">Description du produit</p>
-                                    <div class="top-product-meta">
-                                        <span class="top-product-price" th:text="${currencyService.formatPrice(product.price)}">€0.00</span>
-                                        <span class="top-product-stock">
-                                                <i class="fas fa-box"></i> Stock: <span th:text="${product.stockQuantity}">0</span>
-                                            </span>
-                                    </div>
-                                    <div class="top-product-actions">
-                                        <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-primary">
-                                            <i class="fas fa-eye"></i> Voir le produit
-                                        </a>
-                                        <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-outline-primary">
-                                            <i class="fas fa-cart-plus"></i> Ajouter
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Flèches de navigation -->
-            <button class="carousel-control-prev" type="button" data-bs-target="#topProductsCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Précédent</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#topProductsCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Suivant</span>
-            </button>
         </div>
     </div>
 
@@ -502,9 +793,56 @@
     </div>
 </div>
 
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
 <footer class="bg-dark text-white mt-5 py-4 text-center">
     <p class="mb-0">© 2024 E-Shop - Tous droits réservés</p>
 </footer>
+
+<!-- ============================================================
+     SCRIPTS
+     ============================================================ -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mise à jour du compteur de slide
+        const carousel = document.getElementById('heroCarousel');
+        if (carousel) {
+            const currentDisplay = document.getElementById('slideCurrent');
+            const totalSlides = document.querySelectorAll('.carousel-item').length;
+
+            carousel.addEventListener('slid.bs.carousel', function(event) {
+                if (currentDisplay) {
+                    const index = event.to + 1;
+                    currentDisplay.textContent = index;
+                }
+            });
+        }
+
+        // Démarrer automatiquement le carrousel si l'utilisateur n'interagit pas
+        let autoplayInterval;
+        const heroCarousel = document.getElementById('heroCarousel');
+
+        if (heroCarousel) {
+            // Pause au survol
+            heroCarousel.addEventListener('mouseenter', function() {
+                clearInterval(autoplayInterval);
+            });
+
+            heroCarousel.addEventListener('mouseleave', function() {
+                // Redémarrer après 3 secondes
+                setTimeout(() => {
+                    const bsCarousel = bootstrap.Carousel.getInstance(heroCarousel);
+                    if (bsCarousel) {
+                        bsCarousel.cycle();
+                    }
+                }, 3000);
+            });
+        }
+    });
+</script>
+
 </body>
 </html>
