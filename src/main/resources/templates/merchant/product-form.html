@@ -18,6 +18,7 @@
             <ul class="navbar-nav me-auto">
                 <li class="nav-item"><a class="nav-link" href="/merchant/dashboard">Dashboard</a></li>
                 <li class="nav-item"><a class="nav-link" href="/merchant/products">Mes produits</a></li>
+                <li class="nav-item"><a class="nav-link" href="/merchant/categories">Mes catégories</a></li>
                 <li class="nav-item"><a class="nav-link" href="/merchant/orders">Commandes</a></li>
             </ul>
             <ul class="navbar-nav">
@@ -33,12 +34,12 @@
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">
-                            <span th:if="${product.id == null}">
-                                <i class="fas fa-plus"></i> Ajouter un produit
-                            </span>
+                        <span th:if="${product.id == null}">
+                            <i class="fas fa-plus"></i> Ajouter un produit
+                        </span>
                         <span th:if="${product.id != null}">
-                                <i class="fas fa-edit"></i> Modifier le produit
-                            </span>
+                            <i class="fas fa-edit"></i> Modifier le produit
+                        </span>
                     </h4>
                 </div>
                 <div class="card-body">
@@ -46,7 +47,6 @@
                           method="post"
                           th:object="${product}">
 
-                        <!-- ID caché pour l'édition -->
                         <input type="hidden" name="id" th:value="${product.id}">
 
                         <div class="mb-3">
@@ -78,16 +78,21 @@
                             <div class="col-12 col-md-6">
                                 <div class="mb-3">
                                     <label for="price" class="form-label fw-bold">
-                                        <i class="fas fa-euro-sign"></i> Prix (€) *
+                                        <i class="fas fa-money-bill-wave"></i> Prix (FCFA) *
                                     </label>
-                                    <input type="number"
-                                           class="form-control"
-                                           id="price"
-                                           name="price"
-                                           th:field="*{price}"
-                                           step="0.01"
-                                           min="0"
-                                           required>
+                                    <div class="input-group">
+                                        <span class="input-group-text">CFA</span>
+                                        <input type="number"
+                                               class="form-control"
+                                               id="price"
+                                               name="price"
+                                               th:field="*{price}"
+                                               step="1"
+                                               min="0"
+                                               required
+                                               placeholder="Ex: 1000">
+                                    </div>
+                                    <small class="text-muted">Entrez le prix en Francs CFA (FCFA)</small>
                                 </div>
                             </div>
 
@@ -140,7 +145,6 @@
                             </small>
                         </div>
 
-                        <!-- Aperçu de l'image -->
                         <div class="mb-3" th:if="${product.imageUrl}">
                             <label class="form-label fw-bold">Aperçu :</label>
                             <br>

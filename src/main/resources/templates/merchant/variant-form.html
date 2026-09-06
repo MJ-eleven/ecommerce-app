@@ -16,18 +16,17 @@
 
 <div class="container my-4">
     <h1 class="mb-4">
-            <span th:if="${variant.id == null}">
-                <i class="fas fa-plus"></i> Ajouter une variante
-            </span>
+        <span th:if="${variant.id == null}">
+            <i class="fas fa-plus"></i> Ajouter une variante
+        </span>
         <span th:if="${variant.id != null}">
-                <i class="fas fa-edit"></i> Modifier la variante
-            </span>
+            <i class="fas fa-edit"></i> Modifier la variante
+        </span>
         <small class="text-muted">pour <span th:text="${product.name}">Produit</span></small>
     </h1>
 
     <div class="row">
         <div class="col-12 col-md-8 col-lg-6">
-            <!-- 🔥 LE FORMULAIRE CHANGE SELON AJOUT OU MODIFICATION -->
             <form th:action="${variant.id == null ? '/merchant/variants/save' : '/merchant/variants/update/' + variant.id}"
                   method="post" class="card p-4">
 
@@ -55,10 +54,16 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="price" class="form-label fw-bold">Prix *</label>
-                    <input type="number" class="form-control" id="price" name="price"
-                           th:value="${variant.price}"
-                           step="0.01" min="0" required>
+                    <label for="price" class="form-label fw-bold">
+                        <i class="fas fa-money-bill-wave"></i> Prix (FCFA) *
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">CFA</span>
+                        <input type="number" class="form-control" id="price" name="price"
+                               th:value="${variant.price}"
+                               step="1" min="0" required placeholder="Ex: 1000">
+                    </div>
+                    <small class="text-muted">Entrez le prix en Francs CFA (FCFA)</small>
                 </div>
 
                 <div class="mb-3">
@@ -85,7 +90,6 @@
                     <small class="text-muted">Laissez vide pour utiliser l'image du produit</small>
                 </div>
 
-                <!-- 🔥 APERÇU DE L'IMAGE POUR LA MODIFICATION -->
                 <div th:if="${variant.imageUrl != null and variant.imageUrl != ''}" class="mb-3">
                     <label class="form-label fw-bold">Aperçu :</label>
                     <br>
