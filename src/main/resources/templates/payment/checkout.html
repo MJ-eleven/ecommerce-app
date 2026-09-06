@@ -58,7 +58,10 @@
 
             <div class="mb-3">
                 <p><strong>Commande #<span th:text="${order.id}">1</span></strong></p>
-                <p><strong>Total :</strong> <span class="text-primary h5" th:text="${order.totalAmount} + ' €'">0.00 €</span></p>
+                <!-- 🔥 PRIX EN FCFA -->
+                <p><strong>Total :</strong>
+                    <span class="text-primary h5" th:text="${currencyService.formatPrice(order.totalAmount)}">0.00 CFA</span>
+                </p>
                 <p><strong>Client :</strong> <span th:text="${order.customerName}">Nom</span></p>
             </div>
 
@@ -74,8 +77,9 @@
 
                 <div id="card-errors" role="alert" class="payment-error"></div>
 
+                <!-- 🔥 BOUTON PAIEMENT AVEC PRIX EN FCFA -->
                 <button type="submit" class="btn btn-primary w-100 py-2 mt-3" id="submitBtn">
-                    <i class="fas fa-lock"></i> Payer <span th:text="${order.totalAmount} + ' €'">0.00 €</span>
+                    <i class="fas fa-lock"></i> Payer <span th:text="${currencyService.formatPrice(order.totalAmount)}">0.00 CFA</span>
                 </button>
 
                 <div class="loading-spinner" id="loading">
@@ -100,7 +104,6 @@
     const publicKey = /*[[${publicKey}]]*/ '';
     console.log('🔑 Clé publique reçue dans JavaScript:', publicKey);
 
-    // 🔥 FORCER LA CLÉ SI ELLE EST VIDE OU PLACEHOLDER
     let stripeKey = publicKey;
     if (!stripeKey || stripeKey === '' || stripeKey === 'pk_test_xxx' || stripeKey === 'pk_test_placeholder') {
         console.warn('⚠️ Clé publique invalide, utilisation de la clé forcée');
@@ -112,7 +115,6 @@
     const stripe = Stripe(stripeKey);
     const elements = stripe.elements();
 
-    // Créer le champ de carte
     const card = elements.create('card', {
         style: {
             base: {
@@ -130,7 +132,6 @@
 
     card.mount('#card-element');
 
-    // Gestion des erreurs de carte
     card.on('change', function(event) {
         const displayError = document.getElementById('card-errors');
         if (event.error) {
@@ -140,7 +141,6 @@
         }
     });
 
-    // Soumission du formulaire
     const form = document.getElementById('payment-form');
     const submitBtn = document.getElementById('submitBtn');
     const loading = document.getElementById('loading');

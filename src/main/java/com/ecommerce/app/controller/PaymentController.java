@@ -1,6 +1,7 @@
 package com.ecommerce.app.controller;
 
 import com.ecommerce.app.model.Order;
+import com.ecommerce.app.service.CurrencyService;
 import com.ecommerce.app.service.OrderService;
 import com.ecommerce.app.service.StripeService;
 import com.stripe.exception.StripeException;
@@ -25,17 +26,21 @@ public class PaymentController {
     @Autowired
     private StripeService stripeService;
 
+    @Autowired
+    private CurrencyService currencyService;
+
     @GetMapping("/checkout/{orderId}")
     public String paymentPage(@PathVariable Long orderId, Model model) {
         try {
             Order order = orderService.getOrderById(orderId);
 
-            // 🔥 RÉCUPÉRER LA CLÉ PUBLIQUE
+            // Récupérer la clé publique
             String publicKey = stripeService.getPublicKey();
             System.out.println("🔑 Clé publique envoyée à la vue: " + publicKey);
 
             model.addAttribute("order", order);
             model.addAttribute("publicKey", publicKey);
+            model.addAttribute("currencyService", currencyService);
             model.addAttribute("pageTitle", "Paiement - E-Shop");
             return "payment/checkout";
         } catch (Exception e) {
@@ -74,11 +79,13 @@ public class PaymentController {
     public String paymentSuccess(@RequestParam String paymentIntentId, Model model) {
         model.addAttribute("pageTitle", "Paiement réussi - E-Shop");
         model.addAttribute("paymentIntentId", paymentIntentId);
+        model.addAttribute("currencyService", currencyService);
         return "payment/success";
     }
 
     @GetMapping("/cancel")
-    public String paymentCancel() {
+    public String paymentCancel(Model model) {
+        model.addAttribute("currencyService", currencyService);
         return "payment/cancel";
     }
 }
