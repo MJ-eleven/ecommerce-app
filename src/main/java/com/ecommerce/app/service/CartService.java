@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@SessionScope
+// 🔥 SUPPRIMER @SessionScope pour éviter l'erreur de session
 public class CartService {
 
     private final List<CartItem> cartItems = new ArrayList<>();
@@ -30,7 +30,7 @@ public class CartService {
         }
     }
 
-    // 🔥 Ajouter une variante
+    // Ajouter une variante
     public void addToCart(ProductVariant variant, int quantity) {
         Optional<CartItem> existingItem = cartItems.stream()
                 .filter(item -> item.getVariant() != null

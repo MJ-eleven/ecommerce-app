@@ -1,7 +1,6 @@
 package com.ecommerce.app.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.annotation.SessionScope;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -9,7 +8,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 @Service
-@SessionScope
+// 🔥 SUPPRIMER @SessionScope pour éviter l'erreur de session
 public class CurrencyService {
 
     private static final double EUR_TO_USD = 1.08;
@@ -56,7 +55,6 @@ public class CurrencyService {
         return Currency.EUR;
     }
 
-    // 🔥 Méthode de conversion (retourne le nombre converti sans symbole)
     public BigDecimal convert(BigDecimal amountInEuro) {
         if (amountInEuro == null) return BigDecimal.ZERO;
         switch (currentCurrency) {
@@ -71,7 +69,6 @@ public class CurrencyService {
         }
     }
 
-    // 🔥 Méthode de formatage (retourne le symbole + le nombre converti)
     public String formatPrice(BigDecimal amountInEuro) {
         BigDecimal converted = convert(amountInEuro);
         Currency currencyInfo = getCurrencyInfo();
