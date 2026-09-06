@@ -97,11 +97,12 @@
 
 <script>
     // 🔥 Récupérer la clé publique Stripe
-    const publicKey = /*[[${publicKey}]]*/ 'pk_test_xxx';
+    const publicKey = /*[[${publicKey}]]*/ '';
     console.log('🔑 Clé publique Stripe:', publicKey);
 
-    if (publicKey === 'pk_test_xxx' || publicKey === '' || publicKey === null) {
-        console.error('❌ Clé publique Stripe manquante !');
+    if (!publicKey || publicKey === '' || publicKey === 'pk_test_xxx' || publicKey === 'pk_test_placeholder') {
+        console.error('❌ Clé publique Stripe invalide !');
+        document.getElementById('card-errors').textContent = 'Erreur de configuration Stripe. Veuillez contacter le support.';
     }
 
     const stripe = Stripe(publicKey);

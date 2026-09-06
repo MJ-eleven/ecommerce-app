@@ -31,6 +31,7 @@ public class PaymentController {
             Order order = orderService.getOrderById(orderId);
             String publicKey = stripeService.getPublicKey();
 
+            // 🔥 LOG POUR VÉRIFICATION
             System.out.println("🔑 Clé publique envoyée à la vue: " + publicKey);
 
             model.addAttribute("order", order);
