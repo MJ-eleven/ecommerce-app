@@ -68,7 +68,7 @@ public class ProductController {
             products = productService.getAllProducts();
         }
 
-        // 🔥 Récupérer l'utilisateur connecté et ses favoris
+        // Récupérer l'utilisateur connecté et ses favoris
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         List<Long> favoriteIds = new ArrayList<>();
 
@@ -88,8 +88,7 @@ public class ProductController {
         model.addAttribute("cartService", cartService);
         model.addAttribute("currencyService", currencyService);
         model.addAttribute("currentUrl", "/products");
-        model.addAttribute("favoriteIds", favoriteIds);  // 🔥 AJOUTÉ
-        model.addAttribute("favoriteService", favoriteService);  // 🔥 AJOUTÉ
+        model.addAttribute("favoriteIds", favoriteIds);
         return "products/list";
     }
 
@@ -98,7 +97,6 @@ public class ProductController {
         Product product = productService.getProductById(id);
         List<ProductVariant> variants = productService.getVariantsByProduct(id);
 
-        // Récupérer l'utilisateur connecté
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = null;
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
@@ -106,13 +104,11 @@ public class ProductController {
             currentUser = userRepository.findByUsername(username).orElse(null);
         }
 
-        // Vérifier si le produit est dans les favoris
         boolean isFavorite = false;
         if (currentUser != null) {
             isFavorite = favoriteService.isFavorite(currentUser, product);
         }
 
-        // Récupérer les avis
         double averageRating = reviewService.getProductAverageRating(product);
         long reviewCount = reviewService.getProductReviewCount(product);
         List<Review> reviews = reviewService.getReviewsByProduct(product);

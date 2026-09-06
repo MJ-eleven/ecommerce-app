@@ -32,12 +32,6 @@
             background-color: #0d6efd;
             color: white;
         }
-        .category-filter.active:hover {
-            background-color: #0b5ed7;
-            color: white;
-        }
-
-        /* 🔥 BOUTON FAVORI SUR LA CARTE */
         .favorite-btn-card {
             position: absolute;
             top: 10px;
@@ -58,11 +52,9 @@
         }
         .favorite-btn-card:hover {
             transform: scale(1.15);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
         .favorite-btn-card .fa-heart {
             font-size: 1.1rem;
-            transition: all 0.3s ease;
         }
         .favorite-btn-card .fa-heart.text-danger {
             color: #dc3545 !important;
@@ -85,9 +77,7 @@
                 <li class="nav-item"><a class="nav-link active" href="/products">Produits</a></li>
                 <li class="nav-item"><a class="nav-link" href="/about">À propos</a></li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <a class="nav-link" href="/orders">
-                        <i class="fas fa-list"></i> Mes commandes
-                    </a>
+                    <a class="nav-link" href="/orders"><i class="fas fa-list"></i> Mes commandes</a>
                 </li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
                     <a class="nav-link" href="/favorites"><i class="fas fa-heart text-danger"></i> Favoris</a>
@@ -171,7 +161,7 @@
         <div class="row g-4">
             <div class="col-12 col-sm-6 col-md-4 col-lg-3" th:each="product : ${products}">
                 <div class="card product-card">
-                    <!-- 🔥 BOUTON FAVORI SUR LA CARTE -->
+                    <!-- BOUTON FAVORI -->
                     <form th:if="${#authorization.expression('isAuthenticated()')}"
                           th:action="${#lists.contains(favoriteIds, product.id) ? '/favorites/remove/' + product.id : '/favorites/add/' + product.id}"
                           method="post"
@@ -186,8 +176,7 @@
                                class="far fa-heart text-muted"></i>
                         </button>
                     </form>
-                    <!-- 🔥 SI NON CONNECTÉ, AFFICHER UN CŒUR GRIS AVEC LIEN VERS LOGIN -->
-                    <a th:unless="${#authorization.expression('isAuthenticated())'}"
+                    <a th:unless="${#authorization.expression('isAuthenticated()')}"
                        href="/login"
                        class="favorite-btn-card"
                        title="Connectez-vous pour ajouter aux favoris"
@@ -201,7 +190,7 @@
                         <h5 class="card-title" th:text="${product.name}">Nom</h5>
                         <p class="card-text text-truncate" th:text="${product.description}">Desc</p>
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="h5 text-primary" th:text="${currencyService.formatPrice(product.price)}">€0</span>
+                            <span class="h5 text-primary" th:text="${currencyService.formatPrice(product.price)}">CFA 0</span>
                             <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-sm btn-primary">
                                 <i class="fas fa-eye"></i> Voir
                             </a>
