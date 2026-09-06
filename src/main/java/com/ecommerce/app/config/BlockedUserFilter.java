@@ -24,15 +24,21 @@ public class BlockedUserFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
+        // Vérifier si c'est une tentative de connexion
         if (request.getRequestURI().equals("/login") && request.getMethod().equals("POST")) {
             String username = request.getParameter("username");
 
             if (username != null && !username.isEmpty()) {
-                User user = userRepository.findByUsername(username).orElse(null);
+                try {
+                    User user = userRepository.findByUsername(username).orElse(null);
 
-                if (user != null && !user.isEnabled()) {
-                    response.sendRedirect("/login?error=blocked");
-                    return;
+                    if (user != null && !user.isEnabled()) {
+                        System.out.println("❌ " + username + " est BLOQUÉ - Redirection vers login?error=blocked");
+                        response.sendRedirect("/login?error=blocked");
+                        return;
+                    }
+                } catch (Exception e) {
+                    System.out.println("⚠️ Erreur lors de la vérification du blocage: " + e.getMessage());
                 }
             }
         }

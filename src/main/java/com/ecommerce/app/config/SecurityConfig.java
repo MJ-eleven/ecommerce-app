@@ -36,6 +36,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                // 🔥 AJOUTER LE FILTRE AVANT LA CONNEXION
                 .addFilterBefore(blockedUserFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -63,6 +64,7 @@ public class SecurityConfig {
                                                                 HttpServletResponse response,
                                                                 Authentication authentication)
                                     throws IOException, ServletException {
+                                System.out.println("✅ CONNEXION RÉUSSIE : " + authentication.getName());
                                 if (authentication.getAuthorities().stream()
                                         .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
                                     response.sendRedirect("/admin/dashboard");
