@@ -41,7 +41,7 @@
         }
 
         /* ============================================================
-           CARROUSEL - DESIGN MODERNE
+           CARROUSEL - IMAGE ENTIÈRE VISIBLE
            ============================================================ */
         .hero-carousel-container {
             position: relative;
@@ -49,6 +49,7 @@
             overflow: hidden;
             margin-bottom: 35px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            background: #0a0a0a;
         }
 
         .hero-carousel {
@@ -69,26 +70,29 @@
             position: relative;
         }
 
+        /* 🔥 IMAGE ENTIÈRE VISIBLE */
         .hero-carousel .carousel-item img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;        /* ← VOIT L'IMAGE EN ENTIER */
             object-position: center;
+            background: #0a0a0a;        /* ← FOND NOIR */
             transition: transform 6s ease;
         }
 
         .hero-carousel .carousel-item.active img {
-            transform: scale(1.05);
+            transform: scale(1.02);
         }
 
+        /* Overlay plus léger */
         .hero-carousel .carousel-item::after {
             content: '';
             position: absolute;
             inset: 0;
             background: linear-gradient(
                 to right,
-                rgba(0, 0, 0, 0.6) 0%,
-                rgba(0, 0, 0, 0.2) 50%,
+                rgba(0, 0, 0, 0.5) 0%,
+                rgba(0, 0, 0, 0.1) 50%,
                 rgba(0, 0, 0, 0) 100%
             );
             z-index: 1;
