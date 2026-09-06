@@ -31,7 +31,7 @@
             </div>
             <div class="card-body p-4">
 
-                <!-- 🔥 MESSAGE DE BLOCAGE -->
+                <!-- MESSAGE DE BLOCAGE -->
                 <div th:if="${param.error == 'blocked'}" class="alert alert-danger blocked-message">
                     <div class="text-center">
                         <i class="fas fa-ban fa-3x text-danger mb-3"></i>
@@ -42,7 +42,7 @@
                     </div>
                 </div>
 
-                <!-- 🔥 MESSAGE D'ERREUR CLASSIQUE -->
+                <!-- MESSAGE D'ERREUR CLASSIQUE -->
                 <div th:if="${param.error != null and param.error != 'blocked'}" class="alert alert-danger">
                     <i class="fas fa-exclamation-circle"></i>
                     <strong>Erreur de connexion</strong><br>Nom d'utilisateur ou mot de passe incorrect.

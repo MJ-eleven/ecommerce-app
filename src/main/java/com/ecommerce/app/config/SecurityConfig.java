@@ -1,7 +1,5 @@
 package com.ecommerce.app.config;
 
-import com.ecommerce.app.model.User;
-import com.ecommerce.app.repository.UserRepository;
 import com.ecommerce.app.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,12 +30,13 @@ public class SecurityConfig {
     private CustomUserDetailsService userDetailsService;
 
     @Autowired
-    private UserRepository userRepository;
+    private BlockedUserFilter blockedUserFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .addFilterBefore(blockedUserFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
@@ -74,26 +74,12 @@ public class SecurityConfig {
                                 }
                             }
                         })
-                        // 🔥 HANDLER PERSONNALISE POUR LE BLOCAGE
                         .failureHandler(new AuthenticationFailureHandler() {
                             @Override
                             public void onAuthenticationFailure(HttpServletRequest request,
                                                                 HttpServletResponse response,
                                                                 AuthenticationException exception)
                                     throws IOException, ServletException {
-
-                                String username = request.getParameter("username");
-                                System.out.println("🔍 Échec de connexion pour: " + username);
-
-                                if (username != null && !username.isEmpty()) {
-                                    User user = userRepository.findByUsername(username).orElse(null);
-                                    if (user != null && !user.isEnabled()) {
-                                        System.out.println("❌ " + username + " est BLOQUÉ !");
-                                        response.sendRedirect("/login?error=blocked");
-                                        return;
-                                    }
-                                }
-
                                 response.sendRedirect("/login?error=true");
                             }
                         })
