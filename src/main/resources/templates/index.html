@@ -677,6 +677,9 @@
         </div>
     </div>
 
+    <!-- ============================================================
+         LISTE DES PRODUITS AVEC COEURS
+         ============================================================ -->
     <div th:if="${products != null and !products.isEmpty()}">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="results-count"><span th:text="${products.size()}">0</span> produit(s) trouvé(s)</h5>
@@ -684,8 +687,10 @@
         <div class="row g-4">
             <div class="col-12 col-sm-6 col-md-4 col-lg-3" th:each="product : ${products}">
                 <div class="card product-card">
-                    <!-- 🔥 BOUTON FAVORI SUR LA CARTE -->
-                    <form th:action="${#lists.contains(favoriteIds, product.id) ? '/favorites/remove/' + product.id : '/favorites/add/' + product.id}"
+
+                    <!-- 🔥 BOUTON FAVORI -->
+                    <form th:if="${#authorization.expression('isAuthenticated()')}"
+                          th:action="${#lists.contains(favoriteIds, product.id) ? '/favorites/remove/' + product.id : '/favorites/add/' + product.id}"
                           method="post"
                           class="position-absolute top-0 end-0 m-2"
                           style="z-index: 10;">
@@ -698,6 +703,15 @@
                                class="far fa-heart text-muted"></i>
                         </button>
                     </form>
+
+                    <!-- Si non connecté -->
+                    <a th:unless="${#authorization.expression('isAuthenticated()')}"
+                       href="/login"
+                       class="favorite-btn-card"
+                       title="Connectez-vous pour ajouter aux favoris"
+                       style="text-decoration: none;">
+                        <i class="far fa-heart text-muted"></i>
+                    </a>
 
                     <img th:src="${product.imageUrl}" class="card-img-top" th:alt="${product.name}"
                          onerror="this.src='https://via.placeholder.com/300x200?text=Product'">

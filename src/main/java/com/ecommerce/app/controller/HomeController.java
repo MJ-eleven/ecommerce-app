@@ -12,8 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -62,20 +62,18 @@ public class HomeController {
         // 🔥 TOP 5 PRODUITS LES PLUS VENDUS
         List<Product> topProducts = productService.getTop5BestSellers();
 
-        // 🔥 Récupérer l'utilisateur connecté
+        // 🔥 Récupérer l'utilisateur connecté et ses favoris
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = null;
+        List<Long> favoriteIds = new ArrayList<>();
+
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
             String username = auth.getName();
-            currentUser = userRepository.findByUsername(username).orElse(null);
-        }
-
-        // 🔥 Récupérer les favoris de l'utilisateur
-        List<Long> favoriteIds = null;
-        if (currentUser != null) {
-            favoriteIds = favoriteService.getFavoriteProductsByUser(currentUser).stream()
-                    .map(Product::getId)
-                    .collect(Collectors.toList());
+            User currentUser = userRepository.findByUsername(username).orElse(null);
+            if (currentUser != null) {
+                favoriteIds = favoriteService.getFavoriteProductsByUser(currentUser).stream()
+                        .map(Product::getId)
+                        .collect(Collectors.toList());
+            }
         }
 
         model.addAttribute("products", products);
@@ -85,8 +83,7 @@ public class HomeController {
         model.addAttribute("currencyService", currencyService);
         model.addAttribute("cartService", cartService);
         model.addAttribute("currentUrl", "/");
-        model.addAttribute("favoriteIds", favoriteIds);  // 🔥 Ajouté
-        model.addAttribute("favoriteService", favoriteService);  // 🔥 Ajouté
+        model.addAttribute("favoriteIds", favoriteIds);
         return "index";
     }
 
