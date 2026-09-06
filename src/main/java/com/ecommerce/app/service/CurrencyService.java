@@ -11,8 +11,8 @@ import java.util.Locale;
 @Service
 public class CurrencyService {
 
-    private static final double EUR_TO_XOF = 655.96;
-    private static final double USD_TO_XOF = 590.0; // Taux approximatif
+    private static final double XOF_TO_EUR = 655.96;
+    private static final double XOF_TO_USD = 590.0;
 
     @Value("${currency.default:XOF}")
     private String defaultCurrency;
@@ -69,17 +69,15 @@ public class CurrencyService {
 
     /**
      * 🔥 Convertit un prix depuis le FCFA vers la devise choisie
-     * @param amountInXOF Montant en FCFA
-     * @return Montant converti dans la devise actuelle
      */
     public BigDecimal convertFromXOF(BigDecimal amountInXOF) {
         if (amountInXOF == null) return BigDecimal.ZERO;
 
         switch (currentCurrency) {
             case "EUR":
-                return amountInXOF.divide(BigDecimal.valueOf(EUR_TO_XOF), 2, RoundingMode.HALF_UP);
+                return amountInXOF.divide(BigDecimal.valueOf(XOF_TO_EUR), 2, RoundingMode.HALF_UP);
             case "USD":
-                return amountInXOF.divide(BigDecimal.valueOf(USD_TO_XOF), 2, RoundingMode.HALF_UP);
+                return amountInXOF.divide(BigDecimal.valueOf(XOF_TO_USD), 2, RoundingMode.HALF_UP);
             case "XOF":
             default:
                 return amountInXOF.setScale(0, RoundingMode.HALF_UP);
@@ -88,13 +86,16 @@ public class CurrencyService {
 
     /**
      * 🔥 Formate un prix en FCFA vers la devise choisie
-     * @param amountInXOF Montant en FCFA
-     * @return Prix formaté avec symbole de la devise
      */
     public String formatPrice(BigDecimal amountInXOF) {
         if (amountInXOF == null) return getSymbol() + " 0";
 
+        System.out.println("💰 Prix en FCFA: " + amountInXOF);
+        System.out.println("💰 Devise actuelle: " + currentCurrency);
+
         BigDecimal converted = convertFromXOF(amountInXOF);
+        System.out.println("💰 Prix converti: " + converted);
+
         Currency currencyInfo = getCurrencyInfo();
 
         NumberFormat formatter = NumberFormat.getInstance(Locale.FRENCH);
@@ -107,7 +108,9 @@ public class CurrencyService {
             formatter.setMinimumFractionDigits(2);
         }
 
-        return currencyInfo.getSymbol() + " " + formatter.format(converted);
+        String result = currencyInfo.getSymbol() + " " + formatter.format(converted);
+        System.out.println("💰 Prix formaté: " + result);
+        return result;
     }
 
     public String formatPrice(double amountInXOF) {

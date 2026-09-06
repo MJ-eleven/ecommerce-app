@@ -59,10 +59,10 @@ public class HomeController {
             products = productService.getFeaturedProducts();
         }
 
-        // 🔥 TOP 5 PRODUITS LES PLUS VENDUS
+        // TOP 5 PRODUITS LES PLUS VENDUS
         List<Product> topProducts = productService.getTop5BestSellers();
 
-        // 🔥 Récupérer l'utilisateur connecté et ses favoris
+        // Récupérer l'utilisateur connecté et ses favoris
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         List<Long> favoriteIds = new ArrayList<>();
 
@@ -76,6 +76,7 @@ public class HomeController {
             }
         }
 
+        // 🔥 AJOUTER CURRENCY SERVICE AU MODÈLE
         model.addAttribute("products", products);
         model.addAttribute("topProducts", topProducts);
         model.addAttribute("categories", categoryService.getAllCategories());

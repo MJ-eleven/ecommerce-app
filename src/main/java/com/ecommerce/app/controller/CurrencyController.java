@@ -17,6 +17,7 @@ public class CurrencyController {
     @GetMapping("/switch")
     public String switchCurrency(@RequestParam String currency, @RequestParam String redirect) {
         currencyService.setCurrency(currency);
+        System.out.println("💰 Devise changée pour : " + currency);
         return "redirect:" + redirect;
     }
 }
