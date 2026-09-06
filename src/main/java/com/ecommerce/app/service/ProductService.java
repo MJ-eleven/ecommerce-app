@@ -3,12 +3,14 @@ package com.ecommerce.app.service;
 import com.ecommerce.app.model.Category;
 import com.ecommerce.app.model.Product;
 import com.ecommerce.app.model.ProductVariant;
+import com.ecommerce.app.repository.OrderRepository;
 import com.ecommerce.app.repository.ProductRepository;
 import com.ecommerce.app.repository.ProductVariantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,6 +24,9 @@ public class ProductService {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     // ============================================================
     // GESTION DES PRODUITS
@@ -73,13 +78,36 @@ public class ProductService {
         return productRepository.findByCategoryId(categoryId);
     }
 
-    // 🔥 RECHERCHE PAR MOT-CLÉ ET CATÉGORIE
     public List<Product> searchByKeywordAndCategory(String keyword, Long categoryId) {
         return productRepository.findByNameContainingAndCategoryId(keyword, categoryId);
     }
 
     public List<Product> getFeaturedProducts() {
         return productRepository.findLatestProducts();
+    }
+
+    // ============================================================
+    // 🔥 TOP 5 PRODUITS LES PLUS VENDUS
+    // ============================================================
+
+    public List<Product> getTop5BestSellers() {
+        List<Object[]> results = orderRepository.findTop5BestSellers();
+        List<Product> topProducts = new ArrayList<>();
+
+        for (Object[] row : results) {
+            Long productId = (Long) row[0];
+            try {
+                Product product = getProductById(productId);
+                if (product != null && product.isActive()) {
+                    topProducts.add(product);
+                }
+                if (topProducts.size() >= 5) break;
+            } catch (Exception e) {
+                System.out.println("⚠️ Produit non trouvé: " + productId);
+            }
+        }
+
+        return topProducts;
     }
 
     // ============================================================

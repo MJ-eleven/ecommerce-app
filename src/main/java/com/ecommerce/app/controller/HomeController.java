@@ -36,26 +36,25 @@ public class HomeController {
 
         List<Product> products;
 
-        // 🔥 RECHERCHE PAR MOT-CLÉ ET CATÉGORIE
         if (keyword != null && !keyword.isEmpty() && categoryId != null) {
-            // Recherche par mot-clé ET catégorie
             products = productService.searchByKeywordAndCategory(keyword, categoryId);
             model.addAttribute("keyword", keyword);
             model.addAttribute("categoryId", categoryId);
         } else if (categoryId != null) {
-            // Recherche par catégorie uniquement
             products = productService.getProductsByCategory(categoryId);
             model.addAttribute("categoryId", categoryId);
         } else if (keyword != null && !keyword.isEmpty()) {
-            // Recherche par mot-clé uniquement
             products = productService.searchProducts(keyword);
             model.addAttribute("keyword", keyword);
         } else {
-            // Tous les produits (en vedette)
             products = productService.getFeaturedProducts();
         }
 
+        // 🔥 TOP 5 PRODUITS LES PLUS VENDUS
+        List<Product> topProducts = productService.getTop5BestSellers();
+
         model.addAttribute("products", products);
+        model.addAttribute("topProducts", topProducts);
         model.addAttribute("categories", categoryService.getAllCategories());
         model.addAttribute("pageTitle", "Accueil - E-Shop");
         model.addAttribute("currencyService", currencyService);

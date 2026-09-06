@@ -47,7 +47,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // STATISTIQUES POUR LE COMMERCANT
     // ============================================================
 
-    // 1. Ventes des 7 derniers jours (commerçant) - Version PostgreSQL
     @Query(value = "SELECT TO_CHAR(o.order_date, 'YYYY-MM-DD') as date, SUM(o.total_amount) as total " +
             "FROM orders o WHERE o.merchant_id = :merchantId AND o.status != 'ANNULÉE' " +
             "AND o.order_date >= :startDate GROUP BY TO_CHAR(o.order_date, 'YYYY-MM-DD') ORDER BY date ASC",
@@ -55,63 +54,65 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Object[]> findSalesLast7Days(@Param("merchantId") Long merchantId,
                                       @Param("startDate") LocalDateTime startDate);
 
-    // 2. Ventes par catégorie (commerçant)
     @Query("SELECT c.name, SUM(o.totalAmount) FROM Order o " +
             "JOIN o.items i JOIN i.product p JOIN p.category c " +
             "WHERE o.merchant.id = :merchantId AND o.status != 'ANNULÉE' " +
             "GROUP BY c.name ORDER BY SUM(o.totalAmount) DESC")
     List<Object[]> findSalesByCategory(@Param("merchantId") Long merchantId);
 
-    // 3. Commandes par statut (commerçant)
     @Query("SELECT o.status, COUNT(o) FROM Order o " +
             "WHERE o.merchant.id = :merchantId GROUP BY o.status")
     List<Object[]> findOrderStatusStats(@Param("merchantId") Long merchantId);
 
-    // 4. Top produits vendus (commerçant)
     @Query("SELECT p.name, SUM(i.quantity) FROM Order o " +
             "JOIN o.items i JOIN i.product p " +
             "WHERE o.merchant.id = :merchantId AND o.status != 'ANNULÉE' " +
             "GROUP BY p.id ORDER BY SUM(i.quantity) DESC")
     List<Object[]> findTopSellingProducts(@Param("merchantId") Long merchantId);
 
-    // 5. Revenus totaux (commerçant)
     @Query("SELECT SUM(o.totalAmount) FROM Order o " +
             "WHERE o.merchant.id = :merchantId AND o.status != 'ANNULÉE'")
     Double findTotalRevenueByMerchant(@Param("merchantId") Long merchantId);
 
-    // 6. Commandes en attente (commerçant)
     @Query("SELECT COUNT(o) FROM Order o " +
             "WHERE o.merchant.id = :merchantId AND o.status = 'EN ATTENTE'")
     Long countPendingOrdersByMerchant(@Param("merchantId") Long merchantId);
 
     // ============================================================
-    // 📊 STATISTIQUES GLOBALES POUR L'ADMIN - Version PostgreSQL
+    // STATISTIQUES GLOBALES POUR L'ADMIN
     // ============================================================
 
-    // 1. Revenus totaux (global)
     @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status != 'ANNULÉE'")
     Double findTotalRevenue();
 
-    // 2. Ventes des 7 derniers jours (global) - Version PostgreSQL
     @Query(value = "SELECT TO_CHAR(o.order_date, 'YYYY-MM-DD') as date, SUM(o.total_amount) as total " +
             "FROM orders o WHERE o.status != 'ANNULÉE' AND o.order_date >= :startDate " +
             "GROUP BY TO_CHAR(o.order_date, 'YYYY-MM-DD') ORDER BY date ASC",
             nativeQuery = true)
     List<Object[]> findGlobalSalesLast7Days(@Param("startDate") LocalDateTime startDate);
 
-    // 3. Ventes par catégorie (global)
     @Query("SELECT c.name, SUM(o.totalAmount) FROM Order o " +
             "JOIN o.items i JOIN i.product p JOIN p.category c " +
             "WHERE o.status != 'ANNULÉE' GROUP BY c.name ORDER BY SUM(o.totalAmount) DESC")
     List<Object[]> findGlobalSalesByCategory();
 
-    // 4. Commandes par statut (global)
     @Query("SELECT o.status, COUNT(o) FROM Order o GROUP BY o.status")
     List<Object[]> findGlobalOrderStatusStats();
 
-    // 5. Top produits vendus (global)
     @Query("SELECT p.name, SUM(i.quantity) FROM Order o " +
             "JOIN o.items i JOIN i.product p " +
             "WHERE o.status != 'ANNULÉE' GROUP BY p.id ORDER BY SUM(i.quantity) DESC")
     List<Object[]> findGlobalTopSellingProducts();
+
+    // ============================================================
+    // 🔥 TOP 5 PRODUITS LES PLUS VENDUS
+    // ============================================================
+    @Query("SELECT p.id, p.name, p.imageUrl, p.price, SUM(i.quantity) as totalVendu " +
+            "FROM Order o " +
+            "JOIN o.items i " +
+            "JOIN i.product p " +
+            "WHERE o.status != 'ANNULÉE' " +
+            "GROUP BY p.id, p.name, p.imageUrl, p.price " +
+            "ORDER BY totalVendu DESC")
+    List<Object[]> findTop5BestSellers();
 }
