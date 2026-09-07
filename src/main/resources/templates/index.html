@@ -73,7 +73,6 @@
             background: #ffffff;
         }
 
-        /* IMAGE BIEN VISIBLE EN ENTIER */
         .hero-carousel .carousel-item img {
             width: 60%;
             height: 100%;
@@ -89,7 +88,6 @@
             transform: scale(1.02);
         }
 
-        /* Overlay plus léger sur le texte */
         .hero-carousel .carousel-item::after {
             content: '';
             position: absolute;
@@ -103,7 +101,6 @@
             z-index: 1;
         }
 
-        /* Contenu - aligné à gauche */
         .carousel-content {
             position: absolute;
             top: 50%;
@@ -220,7 +217,6 @@
             transform: translateY(-2px);
         }
 
-        /* Indicateurs */
         .hero-carousel .carousel-indicators {
             bottom: 20px;
             gap: 8px;
@@ -245,7 +241,6 @@
             border-radius: 10px;
         }
 
-        /* Flèches */
         .hero-carousel .carousel-control-prev,
         .hero-carousel .carousel-control-next {
             width: 45px;
@@ -305,7 +300,6 @@
             object-fit: cover;
         }
 
-        /* BOUTON FAVORI */
         .favorite-btn-card {
             position: absolute;
             top: 10px;
@@ -339,7 +333,6 @@
             color: #6c757d !important;
         }
 
-        /* BADGE PROMOTION */
         .promo-badge {
             position: absolute;
             top: 10px;
@@ -448,11 +441,6 @@
             .carousel-content .btn-slide {
                 padding: 8px 22px;
                 font-size: 0.75rem;
-            }
-            .hero-carousel .carousel-control-prev,
-            .hero-carousel .carousel-control-next {
-                width: 38px;
-                height: 38px;
             }
         }
 
@@ -765,7 +753,7 @@
     </div>
 
     <!-- ============================================================
-         LISTE DES PRODUITS AVEC COEURS ET PROMOTIONS
+         LISTE DES PRODUITS
          ============================================================ -->
     <div th:if="${products != null and !products.isEmpty()}">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -797,7 +785,6 @@
                         </button>
                     </form>
 
-                    <!-- Si non connecté -->
                     <a th:unless="${#authorization.expression('isAuthenticated()')}"
                        href="/login"
                        class="favorite-btn-card"
@@ -812,7 +799,6 @@
                         <h5 class="card-title" th:text="${product.name}">Nom</h5>
                         <p class="card-text text-truncate" th:text="${product.description}">Description</p>
 
-                        <!-- PRIX AVEC PROMOTION -->
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <span th:if="${product.onPromotion}" class="price-old"
