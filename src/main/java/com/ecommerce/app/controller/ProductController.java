@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -97,6 +98,7 @@ public class ProductController {
         Product product = productService.getProductById(id);
         List<ProductVariant> variants = productService.getVariantsByProduct(id);
 
+        // Récupérer l'utilisateur connecté
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = null;
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
@@ -104,15 +106,20 @@ public class ProductController {
             currentUser = userRepository.findByUsername(username).orElse(null);
         }
 
+        // Vérifier si le produit est dans les favoris
         boolean isFavorite = false;
         if (currentUser != null) {
             isFavorite = favoriteService.isFavorite(currentUser, product);
         }
 
+        // Récupérer les avis
         double averageRating = reviewService.getProductAverageRating(product);
         long reviewCount = reviewService.getProductReviewCount(product);
         List<Review> reviews = reviewService.getReviewsByProduct(product);
         boolean hasReviewed = currentUser != null && reviewService.hasUserReviewed(product, currentUser);
+
+        // 🔥 PRIX À AFFICHER (avec promotion)
+        BigDecimal displayPrice = product.getDisplayPrice();
 
         model.addAttribute("product", product);
         model.addAttribute("variants", variants);
@@ -122,6 +129,7 @@ public class ProductController {
         model.addAttribute("reviewCount", reviewCount);
         model.addAttribute("reviews", reviews);
         model.addAttribute("hasReviewed", hasReviewed);
+        model.addAttribute("displayPrice", displayPrice);  // 🔥 AJOUTÉ
         model.addAttribute("pageTitle", product.getName() + " - E-Shop");
         model.addAttribute("cartService", cartService);
         model.addAttribute("currencyService", currencyService);

@@ -5,13 +5,15 @@ public class CartItem {
     private Product product;
     private ProductVariant variant;
     private int quantity;
+    private double unitPrice;  // 🔥 NOUVEAU : prix unitaire (avec promotion)
 
     public CartItem() {}
 
-    public CartItem(Product product, ProductVariant variant, int quantity) {
+    public CartItem(Product product, ProductVariant variant, int quantity, double unitPrice) {
         this.product = product;
         this.variant = variant;
         this.quantity = quantity;
+        this.unitPrice = unitPrice;
     }
 
     // ============================================================
@@ -42,15 +44,20 @@ public class CartItem {
         this.quantity = quantity;
     }
 
+    public double getUnitPrice() {
+        return unitPrice;
+    }
+
+    public void setUnitPrice(double unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
     // ============================================================
     // MÉTHODES UTILITAIRES
     // ============================================================
 
     public double getTotalPrice() {
-        if (variant != null) {
-            return variant.getPrice().doubleValue() * quantity;
-        }
-        return product.getPrice().doubleValue() * quantity;
+        return unitPrice * quantity;
     }
 
     public String getDisplayName() {
@@ -65,12 +72,5 @@ public class CartItem {
             return variant.getImageUrl();
         }
         return product.getImageUrl();
-    }
-
-    public double getUnitPrice() {
-        if (variant != null) {
-            return variant.getPrice().doubleValue();
-        }
-        return product.getPrice().doubleValue();
     }
 }

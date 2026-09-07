@@ -26,6 +26,15 @@
                 font-size: 0.85rem;
             }
         }
+        .price-old {
+            text-decoration: line-through;
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+        .price-new {
+            font-weight: bold;
+            color: #dc3545;
+        }
     </style>
 </head>
 <body>
@@ -44,6 +53,9 @@
                     <a class="nav-link" href="/orders">
                         <i class="fas fa-list"></i> Mes commandes
                     </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" href="/favorites"><i class="fas fa-heart text-danger"></i> Favoris</a>
                 </li>
             </ul>
             <ul class="navbar-nav">
@@ -121,10 +133,20 @@
                                        th:text="'Variante: ' + ${item.variant.name}">
                                     Variante
                                 </small>
+                                <!-- 🔥 BADGE PROMO -->
+                                <span th:if="${item.product.onPromotion}"
+                                      class="badge bg-danger ms-1" style="font-size: 0.6rem;">
+                                    PROMO
+                                </span>
                             </div>
                         </div>
                     </td>
-                    <td th:text="${currencyService.formatPrice(item.unitPrice)}">€0.00</td>
+                    <td>
+                        <!-- 🔥 PRIX UNITAIRE AVEC PROMOTION -->
+                        <span th:if="${item.product.onPromotion}" class="price-old d-block"
+                              th:text="${currencyService.formatPrice(item.product.price)}">CFA 0</span>
+                        <span class="price-new" th:text="${currencyService.formatPrice(item.unitPrice)}">CFA 0</span>
+                    </td>
                     <td>
                         <form th:action="@{/cart/update/{id}(id=${item.product.id})}"
                               method="post"
@@ -141,7 +163,7 @@
                             </button>
                         </form>
                     </td>
-                    <td class="fw-bold text-primary" th:text="${currencyService.formatPrice(item.totalPrice)}">€0.00</td>
+                    <td class="fw-bold text-primary" th:text="${currencyService.formatPrice(item.totalPrice)}">CFA 0</td>
                     <td>
                         <form th:action="@{/cart/remove/{id}(id=${item.product.id})}"
                               method="post">
@@ -155,7 +177,7 @@
                 <tfoot>
                 <tr class="table-primary fw-bold">
                     <td colspan="3" class="text-end">Total</td>
-                    <td class="text-primary" th:text="${currencyService.formatPrice(totalPrice)}">€0.00</td>
+                    <td class="text-primary" th:text="${currencyService.formatPrice(totalPrice)}">CFA 0</td>
                     <td>
                         <form th:action="@{/cart/clear}" method="post">
                             <button type="submit" class="btn btn-sm btn-outline-danger">
@@ -184,9 +206,16 @@
                                    th:text="'Variante: ' + ${item.variant.name}">
                                 Variante
                             </small>
-                            <p class="mb-1 text-primary fw-bold"
-                               th:text="${currencyService.formatPrice(item.unitPrice)} + ' / unité'">
-                                €0
+                            <!-- 🔥 BADGE PROMO -->
+                            <span th:if="${item.product.onPromotion}"
+                                  class="badge bg-danger ms-1" style="font-size: 0.6rem;">
+                                PROMO
+                            </span>
+                            <p class="mb-1 mt-1">
+                                <!-- 🔥 PRIX UNITAIRE AVEC PROMOTION -->
+                                <span th:if="${item.product.onPromotion}" class="price-old"
+                                      th:text="${currencyService.formatPrice(item.product.price)}">CFA 0</span>
+                                <span class="price-new" th:text="${currencyService.formatPrice(item.unitPrice)} + ' / unité'">CFA 0</span>
                             </p>
                             <div class="d-flex align-items-center gap-2 mt-2">
                                 <form th:action="@{/cart/update/{id}(id=${item.product.id})}"
@@ -211,7 +240,7 @@
                                 </form>
                             </div>
                             <p class="mb-0 mt-2 fw-bold">
-                                Total: <span class="text-primary" th:text="${currencyService.formatPrice(item.totalPrice)}">€0</span>
+                                Total: <span class="text-primary" th:text="${currencyService.formatPrice(item.totalPrice)}">CFA 0</span>
                             </p>
                         </div>
                     </div>
@@ -221,7 +250,7 @@
             <div class="card bg-primary text-white">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <span class="fw-bold">Total</span>
-                    <span class="h4 mb-0" th:text="${currencyService.formatPrice(totalPrice)}">€0.00</span>
+                    <span class="h4 mb-0" th:text="${currencyService.formatPrice(totalPrice)}">CFA 0</span>
                 </div>
             </div>
 

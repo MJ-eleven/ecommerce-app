@@ -114,10 +114,36 @@
             border-left: 4px solid #ffc107;
             background: #f8f9fa;
         }
+        .price-old {
+            text-decoration: line-through;
+            color: #6c757d;
+            font-size: 1.2rem;
+        }
+        .price-new {
+            font-weight: bold;
+            font-size: 2.5rem;
+        }
+        .price-new.text-danger {
+            color: #dc3545 !important;
+        }
+        .price-new.text-primary {
+            color: #0d6efd !important;
+        }
+        .discount-badge {
+            font-size: 0.9rem;
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: #28a745;
+            color: white;
+        }
         @media (max-width: 576px) {
             .variant-option img {
                 width: 60px;
                 height: 60px;
+            }
+            .price-new {
+                font-size: 1.8rem;
             }
         }
     </style>
@@ -205,6 +231,8 @@
                 <span class="badge bg-primary" th:text="${product.category.name}">Catégorie</span>
                 <span class="badge bg-success" th:text="'Stock: ' + ${product.stockQuantity}">Stock</span>
                 <span th:if="${hasVariants}" class="badge bg-info">Plusieurs variantes</span>
+                <!-- 🔥 BADGE PROMO -->
+                <span th:if="${product.onPromotion}" class="badge bg-danger">🔥 PROMO</span>
             </div>
 
             <!-- 🔥 NOTATION -->
@@ -239,7 +267,19 @@
             </div>
 
             <p class="lead" th:text="${product.description}">Description</p>
-            <h2 id="variantPrice" class="text-primary mb-4" th:text="${currencyService.formatPrice(product.price)}">€0.00</h2>
+
+            <!-- 🔥 PRIX AVEC PROMOTION -->
+            <div class="mb-3">
+                <span th:if="${product.onPromotion}" class="price-old me-2"
+                      th:text="${currencyService.formatPrice(product.price)}">CFA 23 900</span>
+                <span class="price-new"
+                      th:classappend="${product.onPromotion} ? 'text-danger' : 'text-primary'"
+                      th:text="${currencyService.formatPrice(displayPrice)}">CFA 27 270</span>
+                <span th:if="${product.onPromotion}"
+                      class="discount-badge ms-2">
+                    -<span th:text="${product.discountPercentage}">12</span>%
+                </span>
+            </div>
 
             <!-- SÉLECTION DES VARIANTES -->
             <div th:if="${hasVariants}" class="mb-4">
@@ -258,7 +298,7 @@
                              onclick="selectDefaultVariant()">
                             <i class="fas fa-star text-warning mb-1" style="font-size: 1.5rem;"></i>
                             <div class="variant-name">Original</div>
-                            <div class="variant-price" th:text="${currencyService.formatPrice(product.price)}">€0</div>
+                            <div class="variant-price" th:text="${currencyService.formatPrice(displayPrice)}">CFA 0</div>
                             <div class="variant-stock" th:text="'Stock: ' + ${product.stockQuantity}">Stock</div>
                             <div class="check-mark"><i class="fas fa-check-circle"></i></div>
                         </div>
@@ -277,7 +317,7 @@
                                  th:alt="${variant.name}"
                                  onerror="this.src='https://via.placeholder.com/80x80?text=Image'">
                             <div class="variant-name" th:text="${variant.name}">Nom</div>
-                            <div class="variant-price" th:text="${currencyService.formatPrice(variant.price)}">€0</div>
+                            <div class="variant-price" th:text="${currencyService.formatPrice(variant.price)}">CFA 0</div>
                             <div class="variant-stock" th:text="'Stock: ' + ${variant.stockQuantity}">Stock</div>
                             <div class="check-mark"><i class="fas fa-check-circle"></i></div>
                         </div>
@@ -396,13 +436,13 @@
         });
         document.getElementById('defaultVariantOption').classList.add('active');
 
-        const price = parseFloat('[[${product.price}]]');
+        const displayPrice = '[[${displayPrice}]]';
         const image = '[[${product.imageUrl}]]';
         const stock = parseInt('[[${product.stockQuantity}]]');
 
         document.getElementById('mainImage').src = image;
         document.getElementById('variantPrice').textContent =
-            document.getElementById('variantPrice').textContent.replace(/[\d,.]*$/, '') + ' ' + price.toFixed(2);
+            document.getElementById('variantPrice').textContent.replace(/[\d,.]*$/, '') + ' ' + parseFloat(displayPrice).toFixed(2);
         document.getElementById('selectedVariantId').value = -1;
         document.getElementById('addToCartBtn').title = 'Ajouter le produit de base au panier';
     }
