@@ -48,7 +48,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // ============================================================
 
     @Query(value = "SELECT TO_CHAR(o.order_date, 'YYYY-MM-DD') as date, SUM(o.total_amount) as total " +
-            "FROM orders o WHERE o.merchant_id = :merchantId AND o.status != 'ANNULÉE' " +
+            "FROM orders o WHERE o.merchant_id = :merchantId AND o.status = 'PAYÉE' " +
             "AND o.order_date >= :startDate GROUP BY TO_CHAR(o.order_date, 'YYYY-MM-DD') ORDER BY date ASC",
             nativeQuery = true)
     List<Object[]> findSalesLast7Days(@Param("merchantId") Long merchantId,
@@ -56,7 +56,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT c.name, SUM(o.totalAmount) FROM Order o " +
             "JOIN o.items i JOIN i.product p JOIN p.category c " +
-            "WHERE o.merchant.id = :merchantId AND o.status != 'ANNULÉE' " +
+            "WHERE o.merchant.id = :merchantId AND o.status = 'PAYÉE' " +
             "GROUP BY c.name ORDER BY SUM(o.totalAmount) DESC")
     List<Object[]> findSalesByCategory(@Param("merchantId") Long merchantId);
 
@@ -66,12 +66,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT p.name, SUM(i.quantity) FROM Order o " +
             "JOIN o.items i JOIN i.product p " +
-            "WHERE o.merchant.id = :merchantId AND o.status != 'ANNULÉE' " +
+            "WHERE o.merchant.id = :merchantId AND o.status = 'PAYÉE' " +
             "GROUP BY p.id ORDER BY SUM(i.quantity) DESC")
     List<Object[]> findTopSellingProducts(@Param("merchantId") Long merchantId);
 
     @Query("SELECT SUM(o.totalAmount) FROM Order o " +
-            "WHERE o.merchant.id = :merchantId AND o.status != 'ANNULÉE'")
+            "WHERE o.merchant.id = :merchantId AND o.status = 'PAYÉE'")
     Double findTotalRevenueByMerchant(@Param("merchantId") Long merchantId);
 
     @Query("SELECT COUNT(o) FROM Order o " +
@@ -82,18 +82,18 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // STATISTIQUES GLOBALES POUR L'ADMIN
     // ============================================================
 
-    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status != 'ANNULÉE'")
+    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = 'PAYÉE'")
     Double findTotalRevenue();
 
     @Query(value = "SELECT TO_CHAR(o.order_date, 'YYYY-MM-DD') as date, SUM(o.total_amount) as total " +
-            "FROM orders o WHERE o.status != 'ANNULÉE' AND o.order_date >= :startDate " +
+            "FROM orders o WHERE o.status = 'PAYÉE' AND o.order_date >= :startDate " +
             "GROUP BY TO_CHAR(o.order_date, 'YYYY-MM-DD') ORDER BY date ASC",
             nativeQuery = true)
     List<Object[]> findGlobalSalesLast7Days(@Param("startDate") LocalDateTime startDate);
 
     @Query("SELECT c.name, SUM(o.totalAmount) FROM Order o " +
             "JOIN o.items i JOIN i.product p JOIN p.category c " +
-            "WHERE o.status != 'ANNULÉE' GROUP BY c.name ORDER BY SUM(o.totalAmount) DESC")
+            "WHERE o.status = 'PAYÉE' GROUP BY c.name ORDER BY SUM(o.totalAmount) DESC")
     List<Object[]> findGlobalSalesByCategory();
 
     @Query("SELECT o.status, COUNT(o) FROM Order o GROUP BY o.status")
@@ -101,7 +101,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT p.name, SUM(i.quantity) FROM Order o " +
             "JOIN o.items i JOIN i.product p " +
-            "WHERE o.status != 'ANNULÉE' GROUP BY p.id ORDER BY SUM(i.quantity) DESC")
+            "WHERE o.status = 'PAYÉE' GROUP BY p.id ORDER BY SUM(i.quantity) DESC")
     List<Object[]> findGlobalTopSellingProducts();
 
     // ============================================================
@@ -111,13 +111,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "FROM Order o " +
             "JOIN o.items i " +
             "JOIN i.product p " +
-            "WHERE o.status != 'ANNULÉE' " +
+            "WHERE o.status = 'PAYÉE' " +
             "GROUP BY p.id, p.name, p.imageUrl, p.price " +
             "ORDER BY totalVendu DESC")
     List<Object[]> findTop5BestSellers();
 
     // ============================================================
-    // 🔥 COMMANDES AVEC STATUT NULL
+    // COMMANDES AVEC STATUT NULL
     // ============================================================
     @Query("SELECT o FROM Order o WHERE o.status IS NULL OR o.status = ''")
     List<Order> findOrdersWithNullStatus();

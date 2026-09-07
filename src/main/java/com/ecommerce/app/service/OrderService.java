@@ -93,6 +93,7 @@ public class OrderService {
 
             // Envoyer une notification au commerçant
             notificationService.createNewOrderNotification(merchant, savedOrder);
+            System.out.println("📧 Notification envoyée au commerçant: " + merchant.getUsername() + " - Commande #" + savedOrder.getId());
 
             if (parentOrder == null) {
                 parentOrder = savedOrder;
@@ -145,7 +146,7 @@ public class OrderService {
     }
 
     // ============================================================
-    // 🔥 MISE À JOUR DU STATUT - SYNCHRONISÉ
+    // MISE À JOUR
     // ============================================================
     @Transactional
     public Order updateOrderStatus(Long id, String status) {
@@ -154,12 +155,12 @@ public class OrderService {
         order.setStatus(status);
         Order updatedOrder = orderRepository.save(order);
 
-        // 🔥 SI CETTE COMMANDE A UN PARENT (SOUS-COMMANDE), METTRE À JOUR LE PARENT
+        // Si cette commande a un parent, mettre à jour le parent
         if (updatedOrder.getParentOrderId() != null) {
             updateParentOrderStatus(updatedOrder.getParentOrderId());
         }
 
-        // 🔥 SI CETTE COMMANDE EST UN PARENT, METTRE À JOUR TOUTES LES SOUS-COMMANDES
+        // Si cette commande est un parent, mettre à jour toutes les sous-commandes
         if (updatedOrder.getParentOrderId() == null) {
             updateSubOrdersStatus(updatedOrder.getId(), status);
         }
@@ -175,7 +176,7 @@ public class OrderService {
             );
         }
 
-        // 🔥 NOTIFIER LE CLIENT DU CHANGEMENT DE STATUT
+        // Notifier le client du changement de statut
         if (updatedOrder.getUser() != null) {
             String message = "📦 La commande #" + updatedOrder.getId() + " est maintenant " + status;
             notificationService.createNotification(
@@ -190,7 +191,46 @@ public class OrderService {
         return updatedOrder;
     }
 
-    // 🔥 Mettre à jour le statut de la commande parente en fonction des sous-commandes
+    /**
+     * 🔥 Marquer une commande comme payée
+     */
+    @Transactional
+    public Order markAsPaid(Long orderId) {
+        Order order = getOrderById(orderId);
+        order.setStatus("PAYÉE");
+        Order updatedOrder = orderRepository.save(order);
+
+        // Si c'est une sous-commande, mettre à jour le parent
+        if (updatedOrder.getParentOrderId() != null) {
+            updateParentOrderStatus(updatedOrder.getParentOrderId());
+        }
+
+        // Notifier le commerçant
+        if (updatedOrder.getMerchant() != null) {
+            String message = "💳 La commande #" + updatedOrder.getId() + " a été payée !";
+            notificationService.createNotification(
+                    updatedOrder.getMerchant(),
+                    updatedOrder,
+                    message,
+                    "PAYMENT_RECEIVED"
+            );
+        }
+
+        // Notifier le client
+        if (updatedOrder.getUser() != null) {
+            String message = "💳 Votre commande #" + updatedOrder.getId() + " a été payée avec succès !";
+            notificationService.createNotification(
+                    updatedOrder.getUser(),
+                    updatedOrder,
+                    message,
+                    "PAYMENT_RECEIVED"
+            );
+        }
+
+        System.out.println("💳 Commande #" + orderId + " marquée comme PAYÉE");
+        return updatedOrder;
+    }
+
     private void updateParentOrderStatus(Long parentOrderId) {
         List<Order> subOrders = orderRepository.findSubOrders(parentOrderId);
         Order parentOrder = getOrderById(parentOrderId);
@@ -220,7 +260,6 @@ public class OrderService {
         }
     }
 
-    // 🔥 Mettre à jour toutes les sous-commandes quand le parent est modifié
     private void updateSubOrdersStatus(Long parentOrderId, String status) {
         List<Order> subOrders = orderRepository.findSubOrders(parentOrderId);
         for (Order subOrder : subOrders) {
