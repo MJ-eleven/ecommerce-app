@@ -41,7 +41,7 @@
         }
 
         /* ============================================================
-           CARROUSEL - DESIGN MODERNE
+           CARROUSEL MODERNE - PRODUIT BIEN VISIBLE
            ============================================================ */
         .hero-carousel-container {
             position: relative;
@@ -49,15 +49,15 @@
             overflow: hidden;
             margin-bottom: 35px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-            background: #0a0a0a;
+            background: #ffffff;
         }
 
         .hero-carousel {
             position: relative;
             width: 100%;
-            height: 55vh;
-            min-height: 350px;
-            max-height: 500px;
+            height: 65vh;
+            min-height: 400px;
+            max-height: 600px;
             overflow: hidden;
         }
 
@@ -68,43 +68,51 @@
         .hero-carousel .carousel-item {
             height: 100%;
             position: relative;
+            display: flex;
+            align-items: center;
+            background: #ffffff;
         }
 
+        /* 🔥 IMAGE BIEN VISIBLE EN ENTIER */
         .hero-carousel .carousel-item img {
-            width: 100%;
+            width: 60%;
             height: 100%;
             object-fit: contain;
             object-position: center;
-            background: #0a0a0a;
+            background: #ffffff;
             transition: transform 6s ease;
+            margin-left: auto;
+            padding: 20px;
         }
 
         .hero-carousel .carousel-item.active img {
             transform: scale(1.02);
         }
 
+        /* Overlay plus léger sur le texte */
         .hero-carousel .carousel-item::after {
             content: '';
             position: absolute;
             inset: 0;
             background: linear-gradient(
                 to right,
-                rgba(0, 0, 0, 0.5) 0%,
-                rgba(0, 0, 0, 0.1) 50%,
-                rgba(0, 0, 0, 0) 100%
+                rgba(255, 255, 255, 0.85) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0) 100%
             );
             z-index: 1;
         }
 
+        /* Contenu - aligné à gauche */
         .carousel-content {
             position: absolute;
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            left: 0;
+            transform: translateY(-50%);
             padding: 0 60px;
             z-index: 2;
-            width: 100%;
-            max-width: 1100px;
+            width: 55%;
+            max-width: 600px;
             pointer-events: none;
         }
 
@@ -114,29 +122,27 @@
 
         .carousel-content .slide-badge {
             display: inline-block;
-            background: rgba(255, 255, 255, 0.15);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 4px 16px;
             border-radius: 30px;
             font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            color: rgba(255, 255, 255, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 10px;
+            color: #fff;
+            margin-bottom: 15px;
         }
 
         .carousel-content .slide-title {
-            font-size: clamp(1.8rem, 4vw, 3.5rem);
+            font-size: clamp(2rem, 4vw, 3.5rem);
             font-weight: 800;
-            color: white;
+            color: #1a1a2e;
             line-height: 1.1;
             margin-bottom: 10px;
-            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
 
         .carousel-content .slide-title .highlight {
             display: inline-block;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -153,23 +159,22 @@
         .carousel-content .slide-price {
             font-size: clamp(1.5rem, 2.5vw, 2.5rem);
             font-weight: 700;
-            color: #fff;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            color: #1a1a2e;
         }
 
         .carousel-content .slide-stock {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            color: rgba(255, 255, 255, 0.8);
-            background: rgba(255, 255, 255, 0.08);
+            color: #6c757d;
+            background: #f8f9fa;
             padding: 4px 16px;
             border-radius: 30px;
             font-size: 0.8rem;
         }
 
         .carousel-content .slide-stock i {
-            color: #4ade80;
+            color: #28a745;
         }
 
         .carousel-content .slide-actions {
@@ -179,7 +184,7 @@
         }
 
         .carousel-content .btn-slide {
-            padding: 10px 30px;
+            padding: 12px 32px;
             border-radius: 50px;
             font-weight: 600;
             font-size: 0.85rem;
@@ -194,28 +199,28 @@
         }
 
         .carousel-content .btn-slide-primary {
-            background: white;
-            color: #1a1a2e;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
         }
 
         .carousel-content .btn-slide-primary:hover {
             transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
         }
 
         .carousel-content .btn-slide-secondary {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: #f8f9fa;
+            color: #1a1a2e;
+            border: 1px solid #dee2e6;
         }
 
         .carousel-content .btn-slide-secondary:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: #e9ecef;
             transform: translateY(-2px);
         }
 
+        /* Indicateurs */
         .hero-carousel .carousel-indicators {
             bottom: 20px;
             gap: 8px;
@@ -226,7 +231,7 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.5);
+            border: 2px solid #667eea;
             background: transparent;
             opacity: 1;
             transition: all 0.4s ease;
@@ -234,25 +239,27 @@
         }
 
         .hero-carousel .carousel-indicators button.active {
-            background: white;
-            border-color: white;
+            background: #667eea;
+            border-color: #667eea;
             width: 30px;
             border-radius: 10px;
         }
 
+        /* Flèches */
         .hero-carousel .carousel-control-prev,
         .hero-carousel .carousel-control-next {
             width: 45px;
             height: 45px;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             opacity: 0;
             transition: all 0.4s ease;
             z-index: 3;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .hero-carousel:hover .carousel-control-prev,
@@ -270,14 +277,15 @@
 
         .hero-carousel .carousel-control-prev:hover,
         .hero-carousel .carousel-control-next:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: #ffffff;
+            transform: translateY(-50%) scale(1.08);
         }
 
         .hero-carousel .carousel-control-prev-icon,
         .hero-carousel .carousel-control-next-icon {
             width: 20px;
             height: 20px;
-            filter: brightness(0) invert(1);
+            filter: brightness(0);
         }
 
         /* ============================================================
@@ -423,12 +431,16 @@
 
         @media (max-width: 992px) {
             .hero-carousel {
-                height: 45vh;
-                min-height: 300px;
-                max-height: 420px;
+                height: 50vh;
+                min-height: 350px;
+                max-height: 450px;
+            }
+            .hero-carousel .carousel-item img {
+                width: 50%;
             }
             .carousel-content {
-                padding: 0 40px;
+                padding: 0 35px;
+                width: 60%;
             }
             .carousel-content .slide-title {
                 font-size: clamp(1.5rem, 3.5vw, 2.5rem);
@@ -439,29 +451,49 @@
             }
             .hero-carousel .carousel-control-prev,
             .hero-carousel .carousel-control-next {
-                width: 35px;
-                height: 35px;
-                opacity: 0.5;
+                width: 38px;
+                height: 38px;
             }
         }
 
         @media (max-width: 768px) {
             .hero-carousel {
-                height: 40vh;
-                min-height: 250px;
-                max-height: 350px;
+                height: 45vh;
+                min-height: 300px;
+                max-height: 400px;
             }
             .hero-carousel-container {
                 border-radius: 12px;
                 margin-bottom: 20px;
             }
+            .hero-carousel .carousel-item img {
+                width: 100%;
+                height: 60%;
+                object-fit: cover;
+                margin-left: 0;
+                padding: 0;
+            }
+            .hero-carousel .carousel-item::after {
+                background: linear-gradient(
+                    to bottom,
+                    rgba(255, 255, 255, 0.9) 0%,
+                    rgba(255, 255, 255, 0.5) 40%,
+                    rgba(255, 255, 255, 0) 100%
+                );
+            }
             .carousel-content {
                 padding: 0 25px;
+                width: 100%;
+                max-width: 100%;
+                text-align: center;
+                top: 45%;
             }
             .carousel-content .slide-title {
                 font-size: clamp(1.2rem, 4vw, 1.8rem);
+                text-align: center;
             }
             .carousel-content .slide-meta {
+                justify-content: center;
                 gap: 12px;
                 margin-bottom: 10px;
             }
@@ -472,14 +504,8 @@
                 padding: 6px 16px;
                 font-size: 0.65rem;
             }
-            .carousel-content .slide-stock {
-                font-size: 0.65rem;
-                padding: 2px 12px;
-            }
-            .carousel-content .slide-badge {
-                font-size: 0.55rem;
-                padding: 2px 12px;
-                margin-bottom: 6px;
+            .carousel-content .slide-actions {
+                justify-content: center;
             }
             .hero-carousel .carousel-indicators {
                 bottom: 12px;
@@ -494,9 +520,9 @@
             }
             .hero-carousel .carousel-control-prev,
             .hero-carousel .carousel-control-next {
-                width: 28px;
-                height: 28px;
-                opacity: 0.3;
+                width: 32px;
+                height: 32px;
+                opacity: 0.4;
             }
             .hero-carousel .carousel-control-prev {
                 left: 10px;
@@ -504,34 +530,30 @@
             .hero-carousel .carousel-control-next {
                 right: 10px;
             }
-            .hero-carousel .carousel-control-prev-icon,
-            .hero-carousel .carousel-control-next-icon {
-                width: 14px;
-                height: 14px;
-            }
         }
 
         @media (max-width: 480px) {
             .hero-carousel {
-                height: 35vh;
-                min-height: 200px;
-                max-height: 280px;
+                height: 40vh;
+                min-height: 250px;
+                max-height: 350px;
             }
             .carousel-content {
                 padding: 0 15px;
+                top: 40%;
             }
             .carousel-content .slide-title {
-                font-size: 0.95rem;
+                font-size: 1rem;
                 margin-bottom: 4px;
             }
             .carousel-content .slide-badge {
-                font-size: 0.45rem;
-                padding: 2px 8px;
-                margin-bottom: 4px;
+                font-size: 0.5rem;
+                padding: 2px 10px;
+                margin-bottom: 8px;
             }
             .carousel-content .btn-slide {
                 padding: 4px 12px;
-                font-size: 0.55rem;
+                font-size: 0.6rem;
                 gap: 4px;
             }
             .carousel-content .slide-meta {
@@ -539,11 +561,11 @@
                 margin-bottom: 6px;
             }
             .carousel-content .slide-price {
-                font-size: 0.85rem;
+                font-size: 0.9rem;
             }
             .carousel-content .slide-stock {
-                font-size: 0.5rem;
-                padding: 1px 8px;
+                font-size: 0.6rem;
+                padding: 2px 10px;
             }
             .hero-carousel .carousel-indicators button {
                 width: 4px;
@@ -554,21 +576,24 @@
             }
             .hero-carousel .carousel-control-prev,
             .hero-carousel .carousel-control-next {
-                width: 22px;
-                height: 22px;
-                opacity: 0.2;
+                width: 24px;
+                height: 24px;
+                opacity: 0.3;
             }
-            .hero-carousel .carousel-control-prev-icon,
-            .hero-carousel .carousel-control-next-icon {
-                width: 10px;
-                height: 10px;
+            .hero-carousel .carousel-control-prev {
+                left: 6px;
+            }
+            .hero-carousel .carousel-control-next {
+                right: 6px;
             }
         }
     </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
+<!-- ============================================================
+     NAVBAR
+     ============================================================ -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
         <a class="navbar-brand" href="/"><i class="fas fa-store"></i> E-Shop</a>
@@ -639,7 +664,7 @@
 </nav>
 
 <!-- ============================================================
-     CARROUSEL MODERNE - TOP 5 PRODUITS
+     CARROUSEL MODERNE - PRODUIT BIEN VISIBLE
      ============================================================ -->
 <div th:if="${topProducts != null and !topProducts.isEmpty()}" class="container">
     <div class="hero-carousel-container">
@@ -658,10 +683,12 @@
                 <div class="carousel-item" th:each="product, iterStat : ${topProducts}"
                      th:classappend="${iterStat.first} ? 'active' : ''">
 
+                    <!-- Image -->
                     <img th:src="${product.imageUrl}"
                          th:alt="${product.name}"
                          onerror="this.src='https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=1200&h=700&fit=crop'">
 
+                    <!-- Contenu -->
                     <div class="carousel-content">
                         <div class="slide-badge">
                             <i class="fas fa-fire" style="color: #f5576c;"></i>
@@ -695,6 +722,7 @@
                 </div>
             </div>
 
+            <!-- Flèches -->
             <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                 <span class="visually-hidden">Précédent</span>
@@ -784,15 +812,14 @@
                         <h5 class="card-title" th:text="${product.name}">Nom</h5>
                         <p class="card-text text-truncate" th:text="${product.description}">Description</p>
 
-                        <!-- 🔥 PRIX AVEC PROMOTION - STYLE MODERNE -->
+                        <!-- 🔥 PRIX AVEC PROMOTION -->
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <span th:if="${product.onPromotion}" class="price-old"
-                                      th:text="${currencyService.formatPrice(product.price)}">CFA 23 900</span>
+                                      th:text="${currencyService.formatPrice(product.price)}">CFA 0</span>
                                 <span class="price-new"
                                       th:classappend="${product.onPromotion} ? 'text-danger' : 'text-primary'"
-                                      th:text="${currencyService.formatPrice(product.onPromotion ? product.promotionPrice : product.price)}">CFA 27 270</span>
-                                <!-- 🔥 BADGE POURCENTAGE -->
+                                      th:text="${currencyService.formatPrice(product.onPromotion ? product.promotionPrice : product.price)}">CFA 0</span>
                                 <span th:if="${product.onPromotion}"
                                       class="badge bg-success discount-badge ms-1">
                                     -<span th:text="${product.discountPercentage}">12</span>%
