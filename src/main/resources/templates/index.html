@@ -150,16 +150,12 @@
             margin-bottom: 15px;
         }
 
+        /* 🔥 PRIX SANS DOUBLE SYMBOLE */
         .carousel-content .slide-price {
             font-size: clamp(1.5rem, 2.5vw, 2.5rem);
             font-weight: 700;
             color: #fff;
             text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .carousel-content .slide-price .currency-symbol {
-            font-size: 0.7em;
-            opacity: 0.7;
         }
 
         .carousel-content .slide-stock {
@@ -632,12 +628,9 @@
                             <span class="highlight">Meilleure offre</span>
                         </h2>
 
-                        <!-- 🔥 PRIX AVEC CONVERSION DYNAMIQUE -->
+                        <!-- 🔥 PRIX AVEC UN SEUL SYMBOLE -->
                         <div class="slide-meta">
-                            <span class="slide-price">
-                                <span class="currency-symbol" th:text="${currencyService != null ? currencyService.getSymbol() : 'CFA'}">CFA</span>
-                                <span th:text="${currencyService.formatPrice(product.price)}">0</span>
-                            </span>
+                            <span class="slide-price" th:text="${currencyService.formatPrice(product.price)}">CFA 0</span>
                             <span class="slide-stock">
                                 <i class="fas fa-box"></i>
                                 Stock: <span th:text="${product.stockQuantity}">0</span>
