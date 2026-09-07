@@ -157,11 +157,6 @@
             text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
         }
 
-        .carousel-content .slide-price .currency-symbol {
-            font-size: 0.7em;
-            opacity: 0.7;
-        }
-
         .carousel-content .slide-stock {
             display: inline-flex;
             align-items: center;
@@ -302,11 +297,6 @@
             object-fit: cover;
         }
 
-        .product-price {
-            color: #667eea;
-            font-weight: bold;
-        }
-
         /* BOUTON FAVORI */
         .favorite-btn-card {
             position: absolute;
@@ -346,7 +336,7 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            background: #dc3545;
+            background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
             color: white;
             padding: 4px 12px;
             border-radius: 20px;
@@ -354,15 +344,23 @@
             font-weight: bold;
             z-index: 5;
             box-shadow: 0 2px 10px rgba(220, 53, 69, 0.3);
+            animation: pulse 2s infinite;
         }
         .promo-badge i {
             margin-right: 4px;
         }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
         .price-old {
             text-decoration: line-through;
             color: #6c757d;
-            font-size: 0.9rem;
-            margin-right: 8px;
+            font-size: 0.85rem;
+            margin-right: 6px;
         }
         .price-new {
             font-weight: bold;
@@ -373,6 +371,15 @@
         }
         .price-new.text-primary {
             color: #0d6efd !important;
+        }
+
+        .discount-badge {
+            font-size: 0.65rem;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: #28a745;
+            color: white;
         }
 
         .search-box {
@@ -777,14 +784,19 @@
                         <h5 class="card-title" th:text="${product.name}">Nom</h5>
                         <p class="card-text text-truncate" th:text="${product.description}">Description</p>
 
-                        <!-- 🔥 PRIX AVEC PROMOTION -->
+                        <!-- 🔥 PRIX AVEC PROMOTION - STYLE MODERNE -->
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <span th:if="${product.onPromotion}" class="price-old"
-                                      th:text="${currencyService.formatPrice(product.price)}">CFA 0</span>
+                                      th:text="${currencyService.formatPrice(product.price)}">CFA 23 900</span>
                                 <span class="price-new"
                                       th:classappend="${product.onPromotion} ? 'text-danger' : 'text-primary'"
-                                      th:text="${currencyService.formatPrice(product.onPromotion ? product.promotionPrice : product.price)}">CFA 0</span>
+                                      th:text="${currencyService.formatPrice(product.onPromotion ? product.promotionPrice : product.price)}">CFA 27 270</span>
+                                <!-- 🔥 BADGE POURCENTAGE -->
+                                <span th:if="${product.onPromotion}"
+                                      class="badge bg-success discount-badge ms-1">
+                                    -<span th:text="${product.discountPercentage}">12</span>%
+                                </span>
                             </div>
                             <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-sm btn-outline-primary">
                                 <i class="fas fa-eye"></i> Voir

@@ -91,8 +91,8 @@
         .price-old {
             text-decoration: line-through;
             color: #6c757d;
-            font-size: 0.9rem;
-            margin-right: 8px;
+            font-size: 0.85rem;
+            margin-right: 6px;
         }
         .price-new {
             font-weight: bold;
@@ -103,6 +103,12 @@
         }
         .price-new.text-primary {
             color: #0d6efd !important;
+        }
+        .discount-badge {
+            font-size: 0.65rem;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 20px;
         }
     </style>
 </head>
@@ -241,16 +247,19 @@
                         <h5 class="card-title" th:text="${product.name}">Nom</h5>
                         <p class="card-text text-truncate" th:text="${product.description}">Desc</p>
 
-                        <!-- 🔥 PRIX AVEC PROMOTION -->
+                        <!-- 🔥 PRIX AVEC PROMOTION - STYLE MODERNE -->
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <!-- Prix barré si promotion -->
                                 <span th:if="${product.onPromotion}" class="price-old"
-                                      th:text="${currencyService.formatPrice(product.price)}">CFA 0</span>
-                                <!-- Prix actuel -->
+                                      th:text="${currencyService.formatPrice(product.price)}">CFA 23 900</span>
                                 <span class="price-new"
                                       th:classappend="${product.onPromotion} ? 'text-danger' : 'text-primary'"
-                                      th:text="${currencyService.formatPrice(product.onPromotion ? product.promotionPrice : product.price)}">CFA 0</span>
+                                      th:text="${currencyService.formatPrice(product.onPromotion ? product.promotionPrice : product.price)}">CFA 27 270</span>
+                                <!-- 🔥 BADGE POURCENTAGE -->
+                                <span th:if="${product.onPromotion}"
+                                      class="badge bg-success discount-badge ms-1">
+                                    -<span th:text="${product.discountPercentage}">12</span>%
+                                </span>
                             </div>
                             <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-sm btn-primary">
                                 <i class="fas fa-eye"></i> Voir

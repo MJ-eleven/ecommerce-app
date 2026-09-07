@@ -14,13 +14,30 @@
             background-color: #f8f9fa;
             font-weight: 600;
         }
-        .promo-badge {
+        .promo-badge-display {
             background: #dc3545;
             color: white;
             padding: 2px 10px;
             border-radius: 20px;
             font-size: 0.7rem;
             font-weight: bold;
+            display: inline-block;
+        }
+        .discount-preview {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #28a745;
+        }
+        .discount-preview .old-price {
+            text-decoration: line-through;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .discount-preview .new-price {
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 1.2rem;
         }
     </style>
 </head>
@@ -186,7 +203,7 @@
                                     <i class="fas fa-fire text-danger"></i> Activer la promotion
                                 </label>
                                 <span class="ms-2" th:if="${product.onPromotion}">
-                                    <span class="promo-badge">🔥 PROMO ACTIVE</span>
+                                    <span class="promo-badge-display">🔥 PROMO ACTIVE</span>
                                 </span>
                             </div>
                         </div>
@@ -217,6 +234,32 @@
                                                placeholder="Ex: PROMO, SOLDES, -50%">
                                         <small class="text-muted">Laissez vide pour utiliser "PROMO" par défaut</small>
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- 🔥 APERÇU DE LA PROMOTION -->
+                            <div th:if="${product.onPromotion and product.promotionPrice != null}"
+                                 class="discount-preview mt-3">
+                                <div class="d-flex align-items-center gap-3 flex-wrap">
+                                    <div>
+                                        <span class="old-price" th:text="${currencyService.formatPrice(product.price)}">CFA 0</span>
+                                        <span class="new-price" th:text="${currencyService.formatPrice(product.promotionPrice)}">CFA 0</span>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-success" style="font-size: 0.8rem;">
+                                            -<span th:text="${product.discountPercentage}">0</span>%
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span class="promo-badge-display">
+                                            <i class="fas fa-fire"></i>
+                                            <span th:text="${product.promotionLabel != null ? product.promotionLabel : 'PROMO'}">PROMO</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="text-muted small mt-1">
+                                    <i class="fas fa-info-circle"></i>
+                                    Le client verra ce prix barré avec le nouveau prix en rouge
                                 </div>
                             </div>
                         </div>

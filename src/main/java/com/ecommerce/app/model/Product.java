@@ -2,6 +2,7 @@ package com.ecommerce.app.model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -169,7 +170,14 @@ public class Product {
         return price;
     }
 
-    // 🔥 VÉRIFICATION SI LE PRODUIT EST EN PROMOTION (méthode unique)
-    // La méthode isOnPromotion() existe déjà plus haut en getter
-    // Ne pas ajouter de méthode en double !
+    // 🔥 CALCULER LE POURCENTAGE DE RÉDUCTION
+    public int getDiscountPercentage() {
+        if (!onPromotion || promotionPrice == null || price.compareTo(BigDecimal.ZERO) == 0) {
+            return 0;
+        }
+        BigDecimal discount = price.subtract(promotionPrice);
+        BigDecimal percentage = discount.multiply(BigDecimal.valueOf(100))
+                .divide(price, 0, RoundingMode.HALF_UP);
+        return percentage.intValue();
+    }
 }
