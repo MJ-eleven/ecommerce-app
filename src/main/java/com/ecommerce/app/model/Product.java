@@ -25,7 +25,6 @@ public class Product {
     @Column(name = "stock_quantity")
     private int stockQuantity = 0;
 
-    // 🔥 FIX : Utiliser TEXT au lieu de VARCHAR(5000)
     @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
@@ -49,6 +48,16 @@ public class Product {
     @Column(name = "attribute_values")
     private String attributeValues;
 
+    // 🔥 CHAMPS PROMOTION
+    @Column(name = "promotion_price")
+    private BigDecimal promotionPrice;
+
+    @Column(name = "is_on_promotion")
+    private boolean onPromotion = false;
+
+    @Column(name = "promotion_label")
+    private String promotionLabel;
+
     // ============================================================
     // CONSTRUCTEURS
     // ============================================================
@@ -62,6 +71,7 @@ public class Product {
         this.stockQuantity = stockQuantity;
         this.imageUrl = imageUrl;
         this.active = true;
+        this.onPromotion = false;
     }
 
     // ============================================================
@@ -104,6 +114,16 @@ public class Product {
     public String getAttributeValues() { return attributeValues; }
     public void setAttributeValues(String attributeValues) { this.attributeValues = attributeValues; }
 
+    // 🔥 GETTERS/SETTERS PROMOTION
+    public BigDecimal getPromotionPrice() { return promotionPrice; }
+    public void setPromotionPrice(BigDecimal promotionPrice) { this.promotionPrice = promotionPrice; }
+
+    public boolean isOnPromotion() { return onPromotion; }
+    public void setOnPromotion(boolean onPromotion) { this.onPromotion = onPromotion; }
+
+    public String getPromotionLabel() { return promotionLabel; }
+    public void setPromotionLabel(String promotionLabel) { this.promotionLabel = promotionLabel; }
+
     // ============================================================
     // MÉTHODES UTILITAIRES
     // ============================================================
@@ -139,5 +159,17 @@ public class Product {
             return price.toString();
         }
         return getMinPrice() + " - " + getMaxPrice();
+    }
+
+    // 🔥 PRIX AFFICHÉ (avec promotion)
+    public BigDecimal getDisplayPrice() {
+        if (onPromotion && promotionPrice != null && promotionPrice.compareTo(BigDecimal.ZERO) > 0) {
+            return promotionPrice;
+        }
+        return price;
+    }
+
+    public boolean isOnPromotion() {
+        return onPromotion && promotionPrice != null && promotionPrice.compareTo(price) < 0;
     }
 }

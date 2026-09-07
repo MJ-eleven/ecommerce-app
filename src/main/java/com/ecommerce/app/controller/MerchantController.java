@@ -150,7 +150,6 @@ public class MerchantController {
         return "merchant/product-form";
     }
 
-    // 🔥 SANS CONVERSION : le prix est directement en FCFA
     @PostMapping("/products/save")
     public String saveProduct(
             @ModelAttribute Product product,
@@ -220,6 +219,46 @@ public class MerchantController {
     }
 
     // ============================================================
+    // GESTION DES PROMOTIONS
+    // ============================================================
+    @PostMapping("/products/promotion/{id}")
+    public String togglePromotion(
+            @PathVariable Long id,
+            @RequestParam(required = false) BigDecimal promotionPrice,
+            @RequestParam(required = false) String promotionLabel,
+            @RequestParam boolean enablePromotion,
+            RedirectAttributes redirectAttributes) {
+        try {
+            User currentUser = getCurrentUser();
+            Product product = productRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Produit non trouvé"));
+
+            if (!product.getUser().getId().equals(currentUser.getId())) {
+                redirectAttributes.addFlashAttribute("error", "❌ Vous n'êtes pas le propriétaire de ce produit");
+                return "redirect:/merchant/products";
+            }
+
+            if (enablePromotion && promotionPrice != null && promotionPrice.compareTo(BigDecimal.ZERO) > 0) {
+                product.setOnPromotion(true);
+                product.setPromotionPrice(promotionPrice);
+                product.setPromotionLabel(promotionLabel != null && !promotionLabel.isEmpty() ? promotionLabel : "PROMO");
+                redirectAttributes.addFlashAttribute("success", "✅ Promotion activée pour " + product.getName());
+            } else {
+                product.setOnPromotion(false);
+                product.setPromotionPrice(null);
+                product.setPromotionLabel(null);
+                redirectAttributes.addFlashAttribute("success", "✅ Promotion désactivée pour " + product.getName());
+            }
+
+            productRepository.save(product);
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "❌ Erreur : " + e.getMessage());
+        }
+        return "redirect:/merchant/products";
+    }
+
+    // ============================================================
     // GESTION DES VARIANTES
     // ============================================================
     @GetMapping("/variants/product/{productId}")
@@ -259,7 +298,6 @@ public class MerchantController {
         return "merchant/variant-form";
     }
 
-    // 🔥 SANS CONVERSION : le prix est directement en FCFA
     @PostMapping("/variants/save")
     public String saveVariant(
             @RequestParam Long productId,
@@ -287,7 +325,7 @@ public class MerchantController {
             variant.setName(name);
             variant.setAttribute1(attribute1);
             variant.setAttribute2(attribute2);
-            variant.setPrice(price);  // Directement en FCFA
+            variant.setPrice(price);
             variant.setStockQuantity(stockQuantity);
             variant.setSku(sku);
             variant.setImageUrl(imageUrl);
@@ -327,7 +365,6 @@ public class MerchantController {
         }
     }
 
-    // 🔥 SANS CONVERSION : le prix est directement en FCFA
     @PostMapping("/variants/update/{id}")
     public String updateVariant(
             @PathVariable Long id,
@@ -357,7 +394,7 @@ public class MerchantController {
             variant.setName(name);
             variant.setAttribute1(attribute1);
             variant.setAttribute2(attribute2);
-            variant.setPrice(price);  // Directement en FCFA
+            variant.setPrice(price);
             variant.setStockQuantity(stockQuantity);
             variant.setSku(sku);
             variant.setImageUrl(imageUrl);

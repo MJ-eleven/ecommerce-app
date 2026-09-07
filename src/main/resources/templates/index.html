@@ -150,12 +150,16 @@
             margin-bottom: 15px;
         }
 
-        /* 🔥 PRIX SANS DOUBLE SYMBOLE */
         .carousel-content .slide-price {
             font-size: clamp(1.5rem, 2.5vw, 2.5rem);
             font-weight: 700;
             color: #fff;
             text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .carousel-content .slide-price .currency-symbol {
+            font-size: 0.7em;
+            opacity: 0.7;
         }
 
         .carousel-content .slide-stock {
@@ -282,7 +286,7 @@
         }
 
         /* ============================================================
-           CARTES PRODUITS AVEC COEUR
+           CARTES PRODUITS AVEC COEUR ET PROMOTION
            ============================================================ */
         .product-card {
             transition: transform 0.3s, box-shadow 0.3s;
@@ -303,6 +307,7 @@
             font-weight: bold;
         }
 
+        /* BOUTON FAVORI */
         .favorite-btn-card {
             position: absolute;
             top: 10px;
@@ -334,6 +339,40 @@
         }
         .favorite-btn-card .fa-heart.text-muted {
             color: #6c757d !important;
+        }
+
+        /* BADGE PROMOTION */
+        .promo-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #dc3545;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            z-index: 5;
+            box-shadow: 0 2px 10px rgba(220, 53, 69, 0.3);
+        }
+        .promo-badge i {
+            margin-right: 4px;
+        }
+        .price-old {
+            text-decoration: line-through;
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-right: 8px;
+        }
+        .price-new {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .price-new.text-danger {
+            color: #dc3545 !important;
+        }
+        .price-new.text-primary {
+            color: #0d6efd !important;
         }
 
         .search-box {
@@ -628,7 +667,6 @@
                             <span class="highlight">Meilleure offre</span>
                         </h2>
 
-                        <!-- 🔥 PRIX AVEC UN SEUL SYMBOLE -->
                         <div class="slide-meta">
                             <span class="slide-price" th:text="${currencyService.formatPrice(product.price)}">CFA 0</span>
                             <span class="slide-stock">
@@ -692,7 +730,7 @@
     </div>
 
     <!-- ============================================================
-         LISTE DES PRODUITS AVEC COEURS
+         LISTE DES PRODUITS AVEC COEURS ET PROMOTIONS
          ============================================================ -->
     <div th:if="${products != null and !products.isEmpty()}">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -701,6 +739,12 @@
         <div class="row g-4">
             <div class="col-12 col-sm-6 col-md-4 col-lg-3" th:each="product : ${products}">
                 <div class="card product-card">
+
+                    <!-- 🔥 BADGE PROMOTION -->
+                    <div th:if="${product.onPromotion}" class="promo-badge">
+                        <i class="fas fa-fire"></i>
+                        <span th:text="${product.promotionLabel != null ? product.promotionLabel : 'PROMO'}">PROMO</span>
+                    </div>
 
                     <!-- BOUTON FAVORI -->
                     <form th:if="${#authorization.expression('isAuthenticated()')}"
@@ -732,8 +776,16 @@
                     <div class="card-body">
                         <h5 class="card-title" th:text="${product.name}">Nom</h5>
                         <p class="card-text text-truncate" th:text="${product.description}">Description</p>
+
+                        <!-- 🔥 PRIX AVEC PROMOTION -->
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="h5 product-price" th:text="${currencyService.formatPrice(product.price)}">CFA 0</span>
+                            <div>
+                                <span th:if="${product.onPromotion}" class="price-old"
+                                      th:text="${currencyService.formatPrice(product.price)}">CFA 0</span>
+                                <span class="price-new"
+                                      th:classappend="${product.onPromotion} ? 'text-danger' : 'text-primary'"
+                                      th:text="${currencyService.formatPrice(product.onPromotion ? product.promotionPrice : product.price)}">CFA 0</span>
+                            </div>
                             <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-sm btn-outline-primary">
                                 <i class="fas fa-eye"></i> Voir
                             </a>
