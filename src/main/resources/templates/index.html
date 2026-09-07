@@ -41,7 +41,7 @@
         }
 
         /* ============================================================
-           CARROUSEL MODERNE - PRODUIT BIEN VISIBLE
+           CARROUSEL MODERNE - UN PRODUIT PAR SLIDE
            ============================================================ */
         .hero-carousel-container {
             position: relative;
@@ -73,7 +73,7 @@
             background: #ffffff;
         }
 
-        /* 🔥 IMAGE BIEN VISIBLE EN ENTIER */
+        /* IMAGE BIEN VISIBLE EN ENTIER */
         .hero-carousel .carousel-item img {
             width: 60%;
             height: 100%;
@@ -664,12 +664,13 @@
 </nav>
 
 <!-- ============================================================
-     CARROUSEL MODERNE - PRODUIT BIEN VISIBLE
+     CARROUSEL MODERNE - UN PRODUIT PAR SLIDE
      ============================================================ -->
 <div th:if="${topProducts != null and !topProducts.isEmpty()}" class="container">
     <div class="hero-carousel-container">
         <div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel" data-bs-interval="5000">
 
+            <!-- Indicateurs -->
             <div class="carousel-indicators">
                 <button type="button" th:each="product, iterStat : ${topProducts}"
                         data-bs-target="#heroCarousel"
@@ -679,16 +680,15 @@
                 </button>
             </div>
 
+            <!-- 🔥 UN SEUL PRODUIT PAR SLIDE -->
             <div class="carousel-inner">
                 <div class="carousel-item" th:each="product, iterStat : ${topProducts}"
                      th:classappend="${iterStat.first} ? 'active' : ''">
 
-                    <!-- Image -->
                     <img th:src="${product.imageUrl}"
                          th:alt="${product.name}"
                          onerror="this.src='https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=1200&h=700&fit=crop'">
 
-                    <!-- Contenu -->
                     <div class="carousel-content">
                         <div class="slide-badge">
                             <i class="fas fa-fire" style="color: #f5576c;"></i>
