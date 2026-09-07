@@ -40,9 +40,6 @@
             margin-bottom: 30px;
         }
 
-        /* ============================================================
-           CARROUSEL MODERNE - UN PRODUIT PAR SLIDE
-           ============================================================ */
         .hero-carousel-container {
             position: relative;
             border-radius: 20px;
@@ -283,9 +280,7 @@
             filter: brightness(0);
         }
 
-        /* ============================================================
-           CARTES PRODUITS AVEC COEUR ET PROMOTION
-           ============================================================ */
+        /* CARTES PRODUITS */
         .product-card {
             transition: transform 0.3s, box-shadow 0.3s;
             height: 100%;
@@ -579,9 +574,7 @@
 </head>
 <body>
 
-<!-- ============================================================
-     NAVBAR
-     ============================================================ -->
+<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
         <a class="navbar-brand" href="/"><i class="fas fa-store"></i> E-Shop</a>
@@ -652,7 +645,7 @@
 </nav>
 
 <!-- ============================================================
-     CARROUSEL MODERNE - UN PRODUIT PAR SLIDE
+     CARROUSEL - UN SEUL PRODUIT PAR SLIDE
      ============================================================ -->
 <div th:if="${topProducts != null and !topProducts.isEmpty()}" class="container">
     <div class="hero-carousel-container">
@@ -663,12 +656,11 @@
                 <button type="button" th:each="product, iterStat : ${topProducts}"
                         data-bs-target="#heroCarousel"
                         th:data-bs-slide-to="${iterStat.index}"
-                        th:classappend="${iterStat.first} ? 'active' : ''"
-                        aria-current="true">
+                        th:classappend="${iterStat.first} ? 'active' : ''">
                 </button>
             </div>
 
-            <!-- UN SEUL PRODUIT PAR SLIDE -->
+            <!-- Slides - UN SEUL PRODUIT PAR SLIDE -->
             <div class="carousel-inner">
                 <div class="carousel-item" th:each="product, iterStat : ${topProducts}"
                      th:classappend="${iterStat.first} ? 'active' : ''">
@@ -679,12 +671,12 @@
 
                     <div class="carousel-content">
                         <div class="slide-badge">
-                            <i class="fas fa-fire" style="color: #f5576c;"></i>
+                            <i class="fas fa-fire"></i>
                             Top #<span th:text="${iterStat.index + 1}">1</span> des ventes
                         </div>
 
                         <h2 class="slide-title">
-                            <span th:text="${product.name}">Nom du produit</span>
+                            <span th:text="${product.name}">Nom produit</span>
                             <br>
                             <span class="highlight">Meilleure offre</span>
                         </h2>
@@ -712,12 +704,10 @@
 
             <!-- Flèches -->
             <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Précédent</span>
+                <span class="carousel-control-prev-icon"></span>
             </button>
             <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Suivant</span>
+                <span class="carousel-control-next-icon"></span>
             </button>
         </div>
     </div>
@@ -752,9 +742,7 @@
         </div>
     </div>
 
-    <!-- ============================================================
-         LISTE DES PRODUITS
-         ============================================================ -->
+    <!-- LISTE DES PRODUITS -->
     <div th:if="${products != null and !products.isEmpty()}">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="results-count"><span th:text="${products.size()}">0</span> produit(s) trouvé(s)</h5>
@@ -763,13 +751,11 @@
             <div class="col-12 col-sm-6 col-md-4 col-lg-3" th:each="product : ${products}">
                 <div class="card product-card">
 
-                    <!-- BADGE PROMOTION -->
                     <div th:if="${product.onPromotion}" class="promo-badge">
                         <i class="fas fa-fire"></i>
                         <span th:text="${product.promotionLabel != null ? product.promotionLabel : 'PROMO'}">PROMO</span>
                     </div>
 
-                    <!-- BOUTON FAVORI -->
                     <form th:if="${#authorization.expression('isAuthenticated()')}"
                           th:action="${#lists.contains(favoriteIds, product.id) ? '/favorites/remove/' + product.id : '/favorites/add/' + product.id}"
                           method="post"
