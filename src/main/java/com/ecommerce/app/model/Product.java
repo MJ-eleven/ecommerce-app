@@ -169,7 +169,7 @@ public class Product {
         return price;
     }
 
-    public boolean isOnPromotion() {
-        return onPromotion && promotionPrice != null && promotionPrice.compareTo(price) < 0;
-    }
+    // 🔥 VÉRIFICATION SI LE PRODUIT EST EN PROMOTION (méthode unique)
+    // La méthode isOnPromotion() existe déjà plus haut en getter
+    // Ne pas ajouter de méthode en double !
 }
